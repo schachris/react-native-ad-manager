@@ -1,32 +1,51 @@
 import * as React from 'react';
 
-import { StyleSheet, Text, View } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { multiply } from 'react-native-ad-manager';
+import { AdScreen } from './screens/AdScreen';
+import { HomeScreen } from './screens/HomeScreen';
+import { ManagerScreen } from './screens/ManagerScreen';
 
-export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
+const HomeStack = createNativeStackNavigator();
+const ManagerStack = createNativeStackNavigator();
+const AdStack = createNativeStackNavigator();
 
-  React.useEffect(() => {
-    multiply(3, 7).then(setResult);
-  }, []);
+const Tab = createBottomTabNavigator();
 
+function MainStack() {
   return (
-    <View style={styles.container}>
-      <Text>Result: {result}</Text>
-    </View>
+    <HomeStack.Navigator screenOptions={{ headerShown: false }}>
+      <HomeStack.Screen name="Home" component={HomeScreen} />
+    </HomeStack.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  box: {
-    width: 60,
-    height: 60,
-    marginVertical: 20,
-  },
-});
+function ManagerNavigationStack() {
+  return (
+    <ManagerStack.Navigator screenOptions={{ headerShown: false }}>
+      <ManagerStack.Screen name="Manager" component={ManagerScreen} />
+    </ManagerStack.Navigator>
+  );
+}
+
+function AdsStack() {
+  return (
+    <AdStack.Navigator screenOptions={{ headerShown: false }}>
+      <AdStack.Screen name="Ads" component={AdScreen} />
+    </AdStack.Navigator>
+  );
+}
+
+export default function RootApp() {
+  return (
+    <NavigationContainer>
+      <Tab.Navigator>
+        <Tab.Screen name="AdStack" component={AdsStack} />
+        <Tab.Screen name="HomeStack" component={MainStack} />
+        <Tab.Screen name="PlaygroundStack" component={ManagerNavigationStack} />
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
+}
