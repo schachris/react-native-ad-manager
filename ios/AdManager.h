@@ -1,4 +1,5 @@
 
+#import <React/RCTEventEmitter.h>
 #ifdef RCT_NEW_ARCH_ENABLED
 #import "RNAdManagerSpec.h"
 
@@ -6,7 +7,7 @@
 #else
 #import <React/RCTBridgeModule.h>
 
-@interface AdManager : NSObject <RCTBridgeModule>
+@interface AdManager : RCTEventEmitter <RCTBridgeModule>
 #endif
 
 @end

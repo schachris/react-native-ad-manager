@@ -3,8 +3,9 @@
 #import "CustomNativeAdError.h"
 
 @implementation AdManager{
-    RCTResponseSenderBlock defaultCustomClickHandler;
+    bool hasDefaultCustomClickHandler;
     NSDictionary * defaultTargeting;
+    bool hasListeners;
 }
 
 RCT_EXPORT_MODULE()
@@ -96,16 +97,20 @@ RCT_REMAP_METHOD(startWithCallback,
     }];
 }
 
-RCT_EXPORT_METHOD(removeCustomClickHandler)
+RCT_REMAP_METHOD(removeCustomDefaultClickHandler,
+                 removeCustomDefaultClickHandlerWithResolver:(RCTPromiseResolveBlock)resolve
+                 withRejecter:(RCTPromiseRejectBlock)reject)
 {
-    defaultCustomClickHandler = nil;
+    hasDefaultCustomClickHandler = NO;
+    resolve(nil);
 }
 
-RCT_REMAP_METHOD(setCustomClickHandler,
-                 setCustomClickHandler:(RCTResponseSenderBlock)callback)
+RCT_REMAP_METHOD(setCustomDefaultClickHandler,
+                 setCustomDefaultClickHandlerWithResolver:(RCTPromiseResolveBlock)resolve
+                 withRejecter:(RCTPromiseRejectBlock)reject)
 {
-    defaultCustomClickHandler = callback;
-    
+    hasDefaultCustomClickHandler = YES;
+    resolve(nil);
 }
 
 RCT_REMAP_METHOD(defaultTargeting,
@@ -242,18 +247,18 @@ RCT_REMAP_METHOD(makeLoaderOutdated,
 
 RCT_REMAP_METHOD(setCustomClickHandlerForLoader,
                  setCustomClickHandlerForLoader: (NSString*) loaderId
-                 clickHandler:(RCTResponseSenderBlock)handler)
+                 withResolver:(RCTPromiseResolveBlock)resolve
+                 withRejecter:(RCTPromiseRejectBlock)reject)
 {
     @try{
+        CustomNativeAdLoader * loader = [[AdManagerController main] getLoaderForIdOrThrow:loaderId];
         [[AdManagerController main] setCustomClickHandlerForLoader:loaderId clickHandler:^(NSString * _Nonnull assetID) {
-            handler(@[@{
-                    @"assetKey": assetID,
-                    @"loaderId": loaderId
-            }]);
+            [self sendAdClickedEventforLoader:loader onAssetKey:assetID];
         }];
+        resolve(nil);
     }
     @catch (CustomNativeAdError *error) {
-        //TODO: Error handling: for example when loader was not found
+        [error insertIntoReactPromiseReject:reject];
     }
 }
 
@@ -264,9 +269,10 @@ RCT_REMAP_METHOD(removeCustomClickHandlerForLoader,
 {
     @try{
         [[AdManagerController main] setCustomClickHandlerForLoader:loaderId clickHandler:nil];
+        resolve(nil);
     }
     @catch (CustomNativeAdError *error) {
-        //TODO: Error handling: for example when loader was not found
+        [error insertIntoReactPromiseReject:reject];
     }
 }
 
@@ -278,17 +284,14 @@ RCT_REMAP_METHOD(recordClickOnAssetKey,
                  withRejecter:(RCTPromiseRejectBlock)reject)
 {
     @try{
+        
+        CustomNativeAdLoader * loader = [[AdManagerController main] getLoaderForIdOrThrow:loaderId];
         GADNativeAdCustomClickHandler customHandler;
-        if (defaultCustomClickHandler) {
+        if (hasDefaultCustomClickHandler && ![loader hasActiveCustomClickHandler]) {
             customHandler = ^(NSString * _Nonnull assetID) {
-                self->defaultCustomClickHandler(
-                                         @[@{
-                                             @"assetKey": assetID,
-                                             @"loaderId": loaderId}]
-                                         );
+                [self sendAdClickedEventforLoader:loader onAssetKey:assetID];
             };
         }
-        CustomNativeAdLoader * loader = [[AdManagerController main] getLoaderForIdOrThrow:loaderId];
         NSString * clickedAssetKey = [[AdManagerController main] forLoaderId:loaderId recordClickOnAssetKey:assetKey withDefaultClickHandler:customHandler];
         
         NSMutableDictionary * data = [self customNativeAdLoaderDetailsToDict:[loader getDetails]];
@@ -306,6 +309,37 @@ RCT_REMAP_METHOD(recordClick,
                  withRejecter:(RCTPromiseRejectBlock)reject)
 {
     [self forLoaderId:loaderId recordClickOnAssetKey:nil withResolver:resolve withRejecter:reject];
+}
+
+
+#pragma mark Send Events
+
+- (void)startObserving
+{
+  hasListeners = YES;
+}
+
+- (void)stopObserving
+{
+  hasListeners = NO;
+}
+
+- (void)sendEvent:(NSString *)name body:(id)body
+{
+  if (hasListeners) {
+    [self sendEventWithName:name body:body];
+  }
+}
+
+- (void) sendAdClickedEventforLoader: (CustomNativeAdLoader * )adLoader onAssetKey: (NSString*) assetKey {
+    CustomNativeAdLoaderDetails details = [adLoader getDetails];
+    NSMutableDictionary *data = [self customNativeAdLoaderDetailsToDict:details];
+    [data setObject:@"assetKey" forKey:assetKey];
+    [self sendEventWithName:@"onAdClicked" body:data];
+}
+
+- (NSArray<NSString *> *)supportedEvents {
+    return @[@"onAdClicked"];
 }
 
 @end

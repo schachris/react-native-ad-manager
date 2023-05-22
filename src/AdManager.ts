@@ -28,7 +28,7 @@ class AdManagerController {
   private customClickHandler: { [id: string]: CustomAdClickHandler } = {};
   private defaultClickHandler: CustomAdClickHandler | undefined = undefined;
   constructor() {
-    this.emitter = new NativeEventEmitter();
+    this.emitter = new NativeEventEmitter(NativeAdManager as any);
 
     // Set up the event listener
     this.subscription = this.emitter.addListener('onAdClicked', (data: AdLoaderDetails<any> & { assetKey: string }) => {
