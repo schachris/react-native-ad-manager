@@ -2,15 +2,241 @@ package com.admanager;
 
 import androidx.annotation.NonNull;
 
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.google.android.gms.ads.admanager.AdManagerAdRequest;
+import com.google.android.gms.ads.nativead.NativeCustomFormatAd;
 
-public class AdManagerModule extends AdManagerSpec {
+import java.util.List;
+import java.util.Set;
+
+public class AdManagerModule extends com.admanager.AdManagerSpec {
   public static final String NAME = "AdManager";
+
+  private ReadableMap _defaultTargeting;
+  private boolean hasCustomClickHandler = false;
 
   AdManagerModule(ReactApplicationContext context) {
     super(context);
+    this._defaultTargeting = null;
+  }
+
+  @ReactMethod
+  @Override
+  public void start() {
+    AdManagerImpl.start(this.getReactApplicationContext());
+  }
+
+  @ReactMethod
+  @Override
+  public void clearAll() {
+    AdManagerImpl.main().clearAll();
+  }
+
+  @ReactMethod
+  @Override
+  public void startWithCallback(Callback callback) {
+    AdManagerImpl.startWithCallback(this.getReactApplicationContext(), initializationStatus -> callback.invoke(Utils.initializationStatusToMap(initializationStatus)));
+  }
+
+  @ReactMethod
+  @Override
+  public void setTestDeviceIds(ReadableArray testDeviceIds) {
+    List<String> deviceIds = Utils.convertReadableArrayToStringArray(testDeviceIds);
+    AdManagerImpl.setTestDeviceIds(deviceIds);
+  }
+
+  @ReactMethod
+  @Override
+  public void defaultTargeting(ReadableMap targeting) {
+    this._defaultTargeting = targeting;
+  }
+
+  @ReactMethod
+  @Override
+  public void removeCustomDefaultClickHandler(Promise promise) {
+    this.hasCustomClickHandler = false;
+    promise.resolve(null);
+  }
+
+  @ReactMethod
+  @Override
+  public void setCustomDefaultClickHandler(Promise promise) {
+    this.hasCustomClickHandler = true;
+    promise.resolve(null);
+  }
+
+  @ReactMethod
+  @Override
+  public void getAvailableAdLoaderIds(Promise promise) {
+    promise.resolve(Utils.convertToWriteableArray(AdManagerImpl.main().getLoaderIds()));
+  }
+
+  @ReactMethod
+  @Override
+  public void getAdLoaderDetails(String loaderId, Promise promise) {
+    try {
+      CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
+      promise.resolve(loader.getDetails().toWriteableMap());
+    }catch (CustomNativeAdError error){
+      error.insertIntoReactPromiseReject(promise);
+    }
+  }
+
+  @ReactMethod
+  @Override
+  public void createAdLoader(ReadableMap options, Promise promise) {
+    try{
+      String adUnitId = options.getString("adUnitId");
+      ReadableArray formatIds = options.getArray("formatIds");
+      String formatId = formatIds.getString(0);
+      ReadableMap videoOptions = options.getMap("videoOptions");
+      CustomNativeAdLoader loader = AdManagerImpl.main().createAdLoader(this.getReactApplicationContext(), adUnitId, formatId);
+      loader.setVideoOptions(AdManagerImpl.getVideoOptions(videoOptions));
+      promise.resolve(loader.getDetails().toWriteableMap());
+    }catch (Throwable error){
+      CustomNativeAdError.fromError(error, "CREATE_REQUEST_ERROR").insertIntoReactPromiseReject(promise);
+    }
+  }
+
+  @ReactMethod
+  @Override
+  public void removeCustomClickHandlerForLoader(String loaderId, Promise promise) {
+    try{
+      CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
+      loader.removeCustomClickHandler();
+      promise.resolve(null);
+    }catch (CustomNativeAdError error){
+      error.insertIntoReactPromiseReject(promise);
+    }
+  }
+
+  @ReactMethod
+  @Override
+  public void setCustomClickHandlerForLoader(String loaderId, Promise promise) {
+    try{
+      CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
+      loader.setCustomClickHandler((nativeCustomFormatAd, s) -> {
+        sendClickEventForLoader(loader, s);
+      });
+      promise.resolve(null);
+    }catch (CustomNativeAdError error){
+      error.insertIntoReactPromiseReject(promise);
+    }
+  }
+
+  private void sendClickEventForLoader(CustomNativeAdLoader loader, String assetKey) {
+    WritableMap data = loader.getDetails().toWriteableMap();
+    data.putString("assetKey", assetKey);
+    getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+      .emit("onAdClicked", data);
+  }
+
+  @ReactMethod
+  @Override
+  public void setIsDisplayingForLoader(String loaderId, Promise promise) {
+    try{
+      CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
+      loader.displayAd();
+      promise.resolve(loader.getDetails().toWriteableMap());
+    }catch (CustomNativeAdError error){
+      error.insertIntoReactPromiseReject(promise);
+    }
+  }
+
+  @ReactMethod
+  @Override
+  public void makeLoaderOutdated(String loaderId, Promise promise) {
+    try{
+      CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
+      loader.makeOutdated();
+      promise.resolve(loader.getDetails().toWriteableMap());
+    }catch (CustomNativeAdError error){
+      error.insertIntoReactPromiseReject(promise);
+    }
+  }
+
+  @ReactMethod
+  @Override
+  public void removeAdLoader(String loaderId, Promise promise) {
+    try{
+      Set<String> remainingIds = AdManagerImpl.main().removeAdLoaderForId(loaderId);
+      promise.resolve(Utils.convertToWriteableArray(remainingIds));
+    }catch (CustomNativeAdError error){
+      error.insertIntoReactPromiseReject(promise);
+    }
+  }
+
+  @ReactMethod
+  @Override
+  public void loadRequest(String loaderId, ReadableMap options, Promise promise) {
+    try{
+      CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
+      AdManagerAdRequest adRequest = AdManagerImpl.getRequestWithOptions(options, this._defaultTargeting);
+      WritableMap customTargeting = Arguments.fromBundle(adRequest.getCustomTargeting());
+
+      if(this.hasCustomClickHandler && !loader.hasCustomClickHandler()){
+        loader.setCustomClickHandler((nativeCustomFormatAd, s) -> {
+          sendClickEventForLoader(loader, s);
+        });
+      }
+
+      loader.loadAd(adRequest, new CustomNativeAdLoaderHandler() {
+        @Override
+        public void onAdReceived(CustomNativeAdLoader adLoader, NativeCustomFormatAd nativeCustomFormatAd) {
+          WritableMap data = adLoader.getDetails().toWriteableMap();
+          data.putMap("targeting", customTargeting);
+          promise.resolve(data);
+        }
+
+        @Override
+        public void onAdLoadFailed(CustomNativeAdLoader adLoader, CustomNativeAdError adError) {
+          adError.insertIntoReactPromiseReject(promise);
+        }
+      });
+
+    }catch (CustomNativeAdError error){
+      error.insertIntoReactPromiseReject(promise);
+    }
+  }
+
+  @ReactMethod
+  @Override
+  public void recordImpression(String loaderId, Promise promise) {
+    try{
+      CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
+      loader.recordImpression();
+      promise.resolve(loader.getDetails().toWriteableMap());
+    }catch (CustomNativeAdError error){
+      error.insertIntoReactPromiseReject(promise);
+    }
+  }
+
+  @ReactMethod
+  @Override
+  public void recordClickOnAssetKey(String loaderId, String assetKey, Promise promise) {
+    try{
+      CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
+      String clickedAssetKey = loader.recordClick(assetKey);
+      WritableMap result = loader.getDetails().toWriteableMap();
+      result.putString("assetKey", clickedAssetKey);
+      promise.resolve(result);
+    }catch (CustomNativeAdError error){
+      error.insertIntoReactPromiseReject(promise);
+    }
+  }
+
+  @ReactMethod
+  @Override
+  public void recordClick(String loaderId, Promise promise) {
+    this.recordClickOnAssetKey(loaderId, null, promise);
   }
 
   @Override
@@ -22,8 +248,8 @@ public class AdManagerModule extends AdManagerSpec {
 
   // Example method
   // See https://reactnative.dev/docs/native-modules-android
-  @ReactMethod
-  public void multiply(double a, double b, Promise promise) {
-    promise.resolve(a * b);
-  }
+//  @ReactMethod
+//  public void multiply(double a, double b, Promise promise) {
+//    promise.resolve(a * b);
+//  }
 }

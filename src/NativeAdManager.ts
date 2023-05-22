@@ -1,22 +1,13 @@
 import type { TurboModule } from 'react-native';
 import { TurboModuleRegistry } from 'react-native';
 
-import type {
-  AdErrorProps,
-  AdState,
-  GADAdRequestOptions,
-  GADInitializationStatus,
-  GADNativeAdImageProps,
-} from './types';
+import type { AdState, GADAdRequestOptions, GADInitializationStatus, GADNativeAdImageProps } from './types';
 
-export type CustomAdClickHandler = (
-  result: undefined | { assetKey: string; loaderId: string },
-  error?: AdErrorProps
-) => void;
+export type CustomAdClickHandler = (result: { assetKey: string } & AdLoaderDetails<any>) => void;
 
 interface ClickHandling {
-  setCustomClickHandler(clickHandler: CustomAdClickHandler): void;
-  removeCustomClickHandler(): Promise<void>;
+  setCustomDefaultClickHandler(): Promise<void>;
+  removeCustomDefaultClickHandler(): Promise<void>;
 }
 
 type AdAssets = Record<string, string | GADNativeAdImageProps>;
@@ -36,7 +27,7 @@ export type AdLoaderDetails<AdFormatType = AdAssets> = {
   ad?: AdDetails<AdFormatType>;
 };
 
-interface LoaderHandling {
+export interface LoaderHandling {
   createAdLoader<AdFormatType>(options: {
     adUnitId: string;
     formatIds: ReadonlyArray<string>;
@@ -61,7 +52,7 @@ interface LoaderHandling {
 
   recordImpression<AdFormatType>(adLoaderId: string): Promise<AdLoaderDetails<AdFormatType>>;
 
-  setCustomClickHandlerForLoader(loaderId: string, clickHandler?: CustomAdClickHandler): Promise<void>;
+  setCustomClickHandlerForLoader(loaderId: string): Promise<void>;
   removeCustomClickHandlerForLoader(loaderId: string): Promise<void>;
 
   recordClick<AdFormatType>(adLoaderId: string): Promise<AdLoaderDetails<AdFormatType> & { assetKey: string }>;

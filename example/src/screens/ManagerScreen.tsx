@@ -280,11 +280,10 @@ export function ManagerScreen() {
             title="set"
             onPress={async () => {
               try {
-                await AdManager.setCustomClickHandlerForLoader(loaderId, (result, error) => {
+                await AdManager.setCustomClickHandlerForLoader(loaderId, (result) => {
                   Alert.alert('Töröooo', 'Custom click handler for specific loader called!');
                   addLog(`recordClickOnAssetKeyWithHandler:`, {
                     result,
-                    error: error,
                   });
                 });
                 addLog(`setCustomClickHandlerForLoader: true`);
@@ -297,7 +296,7 @@ export function ManagerScreen() {
             title="remove"
             onPress={async () => {
               try {
-                AdManager.removeCustomClickHandlerForLoader(loaderId);
+                await AdManager.removeCustomClickHandlerForLoader(loaderId);
                 addLog(`setCustomClickHandlerForLoader: false`);
               } catch (e) {
                 addLog(`Error:`, (e as Error).message);
@@ -305,18 +304,18 @@ export function ManagerScreen() {
             }}
           />
           <Button
-            title="setCustomClickHandler (alert)"
+            title="setCustomDefaultClickHandler (alert)"
             onPress={async () => {
-              AdManager.setCustomClickHandler((result) => {
+              await AdManager.setCustomDefaultClickHandler((result) => {
                 Alert.alert('CustomClickHandler', JSON.stringify(result || {}));
               });
               addLog(`set custom click handler:`);
             }}
           />
           <Button
-            title="remove customClickHandler (alert)"
+            title="remove customDefaultClickHandler (alert)"
             onPress={async () => {
-              AdManager.removeCustomClickHandler();
+              await AdManager.removeCustomDefaultClickHandler();
               addLog(`removed custom click handler:`);
             }}
           />
