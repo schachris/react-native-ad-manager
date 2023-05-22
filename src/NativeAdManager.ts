@@ -1,14 +1,11 @@
 import type { TurboModule } from 'react-native';
 import { TurboModuleRegistry } from 'react-native';
 
-import type { AdState, GADAdRequestOptions, GADInitializationStatus, GADNativeAdImageProps } from './types';
+import type { UnsafeObject } from 'react-native/Libraries/Types/CodegenTypes';
+
+import type { AdState, GADNativeAdImageProps } from './types';
 
 export type CustomAdClickHandler = (result: { assetKey: string } & AdLoaderDetails<any>) => void;
-
-interface ClickHandling {
-  setCustomDefaultClickHandler(): Promise<void>;
-  removeCustomDefaultClickHandler(): Promise<void>;
-}
 
 type AdAssets = Record<string, string | GADNativeAdImageProps>;
 
@@ -27,7 +24,15 @@ export type AdLoaderDetails<AdFormatType = AdAssets> = {
   ad?: AdDetails<AdFormatType>;
 };
 
-export interface LoaderHandling {
+export interface Spec extends TurboModule {
+  start(): void;
+  clearAll(): void;
+  startWithCallback(callback: (status: UnsafeObject) => void): void;
+  setTestDeviceIds(testDeviceIds: ReadonlyArray<string>): void;
+
+  setCustomDefaultClickHandler(): Promise<void>;
+  removeCustomDefaultClickHandler(): Promise<void>;
+
   createAdLoader<AdFormatType>(options: {
     adUnitId: string;
     formatIds: ReadonlyArray<string>;
@@ -39,7 +44,7 @@ export interface LoaderHandling {
   }): Promise<AdLoaderDetails<AdFormatType>>;
   loadRequest<AdFormatType, AdTargetingOptions = Record<string, string>>(
     adLoaderId: string,
-    options: GADAdRequestOptions<AdTargetingOptions>
+    options: UnsafeObject
   ): Promise<AdLoaderDetails<AdFormatType> & { targeting: AdTargetingOptions }>;
 
   removeAdLoader(loaderId: string): Promise<ReadonlyArray<string>>;
@@ -60,13 +65,10 @@ export interface LoaderHandling {
     adLoaderId: string,
     assetKey: string
   ): Promise<AdLoaderDetails<AdFormatType> & { assetKey: string }>;
-}
 
-export interface Spec extends LoaderHandling, ClickHandling, TurboModule {
-  start(): void;
-  clearAll(): void;
-  startWithCallback(callback: (status: GADInitializationStatus) => void): void;
-  setTestDeviceIds(testDeviceIds: ReadonlyArray<string>): void;
+  // event emitter
+  addListener: (eventName: string) => void;
+  removeListeners: (count: number) => void;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('AdManager');

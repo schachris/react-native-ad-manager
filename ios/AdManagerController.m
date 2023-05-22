@@ -149,6 +149,13 @@
     self.adLoaders = [NSMutableDictionary new];
 }
 
+- (void) clearAllClickHandler {
+    for (NSString *loaderId in self.adLoaders.allKeys){
+        CustomNativeAdLoader *loader = [self.adLoaders objectForKey:loaderId];
+        [loader setCustomClickHandler:nil];
+    }
+}
+
 
 - ( CustomNativeAdLoader * _Nonnull ) getLoaderForIdOrThrow: (NSString *) loaderId {
     

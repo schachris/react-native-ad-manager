@@ -47,6 +47,7 @@ typedef void (^ReceivedAdBlock)(CustomNativeAdLoader* loader, GADCustomNativeAd*
 - (NSString *) forLoaderId: (NSString *) loaderId recordClickOnAssetKey: (nullable NSString *) assetKey withDefaultClickHandler: (nullable GADNativeAdCustomClickHandler) defaultClickHandler;
 
 - (void) clearAll;
+- (void) clearAllClickHandler;
 
 @end
 

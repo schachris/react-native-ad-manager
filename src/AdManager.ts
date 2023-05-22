@@ -53,7 +53,7 @@ class AdManagerController {
   }
 
   startWithCallback(callback: (status: GADInitializationStatus) => void) {
-    return NativeAdManager.startWithCallback(callback);
+    return NativeAdManager.startWithCallback(callback as any);
   }
 
   setTestDeviceIds(testDeviceIds: ReadonlyArray<string>) {

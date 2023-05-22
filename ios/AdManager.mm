@@ -102,6 +102,7 @@ RCT_REMAP_METHOD(removeCustomDefaultClickHandler,
                  withRejecter:(RCTPromiseRejectBlock)reject)
 {
     hasDefaultCustomClickHandler = NO;
+    // TODO: some ad loaders may have used the defaultCustomClickHandler, they have to be removed otherwise nothing will happen...when clicked
     resolve(nil);
 }
 
@@ -311,6 +312,163 @@ RCT_REMAP_METHOD(recordClick,
     [self forLoaderId:loaderId recordClickOnAssetKey:nil withResolver:resolve withRejecter:reject];
 }
 
+#pragma mark NewArch
+#ifdef RCT_NEW_ARCH_ENABLED
+- (void)createAdLoader:(JS::NativeAdManager::SpecCreateAdLoaderOptions &)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    
+    std::optional<JS::NativeAdManager::SpecCreateAdLoaderOptionsVideoConfig> video = options.videoConfig();
+    //TODO: Make this work with the passed config
+    NSMutableDictionary * videoConfig = [NSMutableDictionary new];
+    GADVideoOptions *videoOptions = [AdManagerController getVideoOptions: videoConfig];
+  
+    @try {
+        CustomNativeAdLoader * loader = [[AdManagerController main] createAdLoaderForAdUnitId:options.adUnitId() withFormatIds:RCTConvertVecToArray(options.formatIds()) andOptions:@[videoOptions]];
+        resolve([self customNativeAdLoaderDetailsToDict: [loader getDetails]]);
+    }
+    @catch (CustomNativeAdError *error) {
+        [error insertIntoReactPromiseReject:reject];
+    }
+}
+
+- (void)getAdLoaderDetails:(NSString *)adLoaderId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    @try {
+        CustomNativeAdLoaderDetails details = [[AdManagerController main] getAdLoaderDetailsForId:adLoaderId];
+        resolve([self customNativeAdLoaderDetailsToDict:details]);
+    }
+    @catch (CustomNativeAdError *error) {
+        [error insertIntoReactPromiseReject:reject];
+    }
+}
+
+
+- (void)getAvailableAdLoaderIds:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    resolve([[AdManagerController main] getAvailableAdLoaderIds]);
+}
+
+
+- (void)loadRequest:(NSString *)adLoaderId options:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    GAMRequest *request = [AdManagerController getRequestWithOptions:options andDefaultTargeting: self->defaultTargeting];
+    
+    [[AdManagerController main] loadRequest:request forId:adLoaderId withSuccessHandler:^(CustomNativeAdLoader * _Nonnull loader, GADCustomNativeAd * _Nonnull ad) {
+        NSMutableDictionary * data = [self customNativeAdLoaderDetailsToDict: [loader getDetails]];
+        NSDictionary *targeting = [request customTargeting];
+        if(targeting != nil && targeting.count > 0){
+            [data setObject:targeting forKey:@"targeting"];
+        }
+        resolve(data);
+    } andErrorHandler:^(CustomNativeAdError * _Nonnull error) {
+        [error insertIntoReactPromiseReject:reject];
+    }];
+}
+
+
+- (void)makeLoaderOutdated:(NSString *)loaderId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    @try{
+        CustomNativeAdLoader * loader = [[AdManagerController main] makeLoaderOutdated:loaderId];
+        resolve([self customNativeAdLoaderDetailsToDict: [loader getDetails]]);
+    }
+    @catch (CustomNativeAdError *error) {
+        [error insertIntoReactPromiseReject:reject];
+    }
+}
+
+
+- (void)recordClick:(NSString *)adLoaderId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [self recordClickOnAssetKey:adLoaderId assetKey:nil resolve:resolve reject:reject];
+}
+
+
+- (void)recordClickOnAssetKey:(NSString *)adLoaderId assetKey:(NSString *)assetKey resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    @try{
+        CustomNativeAdLoader * loader = [[AdManagerController main] getLoaderForIdOrThrow: adLoaderId];
+        GADNativeAdCustomClickHandler customHandler;
+        if (hasDefaultCustomClickHandler && ![loader hasActiveCustomClickHandler]) {
+            customHandler = ^(NSString * _Nonnull assetID) {
+                [self sendAdClickedEventforLoader:loader onAssetKey:assetID];
+            };
+        }
+        NSString * clickedAssetKey = [[AdManagerController main] forLoaderId: adLoaderId recordClickOnAssetKey:assetKey withDefaultClickHandler:customHandler];
+        
+        NSMutableDictionary * data = [self customNativeAdLoaderDetailsToDict:[loader getDetails]];
+        [data setObject:clickedAssetKey forKey:@"assetKey"];
+        resolve(data);
+    }
+    @catch (CustomNativeAdError *error) {
+        [error insertIntoReactPromiseReject:reject];
+    }
+}
+
+
+- (void)recordImpression:(NSString *)adLoaderId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    @try{
+        CustomNativeAdLoader * loader = [[AdManagerController main] recordImpressionForId:adLoaderId];
+        resolve([self customNativeAdLoaderDetailsToDict: [loader getDetails]]);
+    }
+    @catch (CustomNativeAdError *error) {
+        [error insertIntoReactPromiseReject:reject];
+    }
+}
+
+
+- (void)removeAdLoader:(NSString *)loaderId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    @try{
+        NSArray<NSString*> * remainingIds = [[AdManagerController main] removeAdLoader:loaderId];
+        resolve(remainingIds);
+    }
+    @catch (CustomNativeAdError *error) {
+        [error insertIntoReactPromiseReject:reject];
+    }
+}
+
+
+- (void)removeCustomClickHandlerForLoader:(NSString *)loaderId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    @try{
+        [[AdManagerController main] setCustomClickHandlerForLoader:loaderId clickHandler:nil];
+        resolve(nil);
+    }
+    @catch (CustomNativeAdError *error) {
+        [error insertIntoReactPromiseReject:reject];
+    }
+}
+
+
+- (void)removeCustomDefaultClickHandler:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    hasDefaultCustomClickHandler = NO;
+    resolve(nil);
+}
+
+
+- (void)setCustomClickHandlerForLoader:(NSString *)loaderId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    @try{
+        CustomNativeAdLoader * loader = [[AdManagerController main] getLoaderForIdOrThrow:loaderId];
+        [[AdManagerController main] setCustomClickHandlerForLoader:loaderId clickHandler:^(NSString * _Nonnull assetID) {
+            [self sendAdClickedEventforLoader:loader onAssetKey:assetID];
+        }];
+        resolve(nil);
+    }
+    @catch (CustomNativeAdError *error) {
+        [error insertIntoReactPromiseReject:reject];
+    }
+}
+
+
+- (void)setCustomDefaultClickHandler:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    hasDefaultCustomClickHandler = YES;
+    resolve(nil);
+}
+
+
+- (void)setIsDisplayingForLoader:(NSString *)loaderId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    @try{
+        CustomNativeAdLoader * loader = [[AdManagerController main] setIsDisplayingForLoader:loaderId];
+        resolve([self customNativeAdLoaderDetailsToDict: [loader getDetails]]);
+    }
+    @catch (CustomNativeAdError *error) {
+        [error insertIntoReactPromiseReject:reject];
+    }
+}
+
+#endif
 
 #pragma mark Send Events
 
@@ -340,6 +498,15 @@ RCT_REMAP_METHOD(recordClick,
 
 - (NSArray<NSString *> *)supportedEvents {
     return @[@"onAdClicked"];
+}
+
+- (void)removeListeners:(double)count {
+    [[AdManagerController main] clearAllClickHandler];
+    [super removeListeners: count];
+}
+
+- (void)addListener:(NSString *)eventName {
+    [super addListener:eventName];
 }
 
 @end

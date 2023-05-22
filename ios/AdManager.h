@@ -3,7 +3,7 @@
 #ifdef RCT_NEW_ARCH_ENABLED
 #import "RNAdManagerSpec.h"
 
-@interface AdManager : NSObject <NativeAdManagerSpec>
+@interface AdManager : RCTEventEmitter <NativeAdManagerSpec>
 #else
 #import <React/RCTBridgeModule.h>
 
