@@ -60,7 +60,6 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
   }
 
   @ReactMethod
-  @Override
   public void defaultTargeting(ReadableMap targeting) {
     this._defaultTargeting = targeting;
   }
@@ -90,6 +89,7 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
   @Override
   public void requestAdTrackingTransparencyBeforeAdLoad(Boolean shouldRequestATT) {
     // this method is ios only
+
   }
 
   @ReactMethod
@@ -170,7 +170,7 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
       try {
         View nativeAdViewContainer = null;
         if (viewTag != -1) {
-          nativeAdViewContainer = nativeViewHierarchyManager.resolveView(viewTag);
+          nativeAdViewContainer = nativeViewHierarchyManager.resolveView((int) viewTag);
         }
         CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
         loader.displayAdOnView(nativeAdViewContainer);

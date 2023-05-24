@@ -35,6 +35,30 @@ yarn
 yarn example ios
 ```
 
+#### Android
+
+Navigate to example/android/gradle.properties and set _newArchEnabled=true_
+then run
+
+```sh
+yarn clean
+yarn
+# and then
+yarn example android
+```
+
+##### generate Artifacts
+
+```sh
+cd ./example/android
+./gradlew generateCodegenArtifactsFromSchema
+cd ../../
+yarn example android
+
+# or
+cd ./example/android && ./gradlew generateCodegenArtifactsFromSchema && cd ../../ && yarn example android
+```
+
 ## Contributing
 
 See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the repository and the development workflow.
