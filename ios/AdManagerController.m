@@ -8,6 +8,8 @@
 #import "AdManagerController.h"
 #import "CustomNativeAdError.h"
 #import "GADCustomNativeAd+Infos.h"
+#import <AppTrackingTransparency/AppTrackingTransparency.h>
+#import <AdSupport/AdSupport.h>
 
 @interface AdManagerController ()
 
@@ -15,7 +17,9 @@
 
 @end
 
-@implementation AdManagerController
+@implementation AdManagerController {
+    NSNumber * cachedATTResult;
+}
 
 + (instancetype) main {
     static AdManagerController *sharedInstance = nil;
@@ -170,6 +174,17 @@
 - (CustomNativeAdLoader *) loadRequest: (GAMRequest*) request forId: (NSString *) loaderId withSuccessHandler: (ReceivedAdBlock) successHandler andErrorHandler: (AdErrorBlock) errorHandler
 {
     CustomNativeAdLoader * loader = [self.adLoaders objectForKey:loaderId];
+    if(self.onlyLoadRequestAfterATT){
+        [self requestCachedIDFAWithCompletion:^(NSNumber *status) {
+            [self loadRequest:request forLoader:loader withSuccessHandler:successHandler andErrorHandler:errorHandler];
+        }];
+    }else{
+        [self loadRequest:request forLoader:loader withSuccessHandler:successHandler andErrorHandler:errorHandler];
+    }
+    return loader;
+}
+
+- (void) loadRequest: (GAMRequest*) request forLoader: (CustomNativeAdLoader *) loader withSuccessHandler: (ReceivedAdBlock) successHandler andErrorHandler: (AdErrorBlock) errorHandler {
     if (loader != nil){
         [loader loadRequest:request WithCompletion:^(CustomNativeAdError * _Nullable error, GADCustomNativeAd * _Nullable customNativeAd) {
             if (error != nil) {
@@ -181,7 +196,6 @@
     }else{
         errorHandler([CustomNativeAdError errorWithMessage:@"AdLoader not found." andCode:@"AD_REQUEST_NOT_FOUND"]);
     }
-    return loader;
 }
 
 - (CustomNativeAdLoader *) recordImpressionForId: (NSString *) loaderId {
@@ -191,6 +205,20 @@
         return loader;
     }
     @throw [CustomNativeAdError errorWithMessage:@"Could not record impression. Propably no ad received yet." andCode:@"RECORD_AD_IMPRESSION_FAILED"];
+}
+
+- (CustomNativeAdLoader *) setIsDisplayingOnView: (UIView *) view forLoader: (NSString*) loaderId
+{
+    if (view == nil){
+        @throw [CustomNativeAdError errorWithMessage:@"The ad could not be displayed on the given view. The view was probably not found. You may add collapsable=false to resolve this issue." andCode:@"AD_NOT_DISPLAYABLE"];
+    }
+    CustomNativeAdLoader * loader = [self getLoaderForIdOrThrow:loaderId];
+    BOOL success = [loader setIsDisplayingOnView:view];
+    if (success){
+        return loader;
+    }else{
+        @throw [CustomNativeAdError errorWithMessage:@"The ad is not ready to display." andCode:@"AD_NOT_DISPLAYABLE"];
+    }
 }
 
 - (CustomNativeAdLoader *) setIsDisplayingForLoader: (NSString*) loaderId
@@ -210,13 +238,17 @@
     return loader;
 }
 
+- (CustomNativeAdLoader *) destroyLoader: (NSString*) loaderId {
+    CustomNativeAdLoader * loader = [self getLoaderForIdOrThrow:loaderId];
+    [loader makeOutdated];
+    return loader;
+}
 
 - (CustomNativeAdLoader *) setCustomClickHandlerForLoader: (NSString*) loaderId clickHandler:(nullable GADNativeAdCustomClickHandler) handler {
     CustomNativeAdLoader * loader = [self getLoaderForIdOrThrow:loaderId];
     [loader setCustomClickHandler:handler];
     return loader;
 }
-
 
 
 - (NSString *) forLoaderId: (NSString *) loaderId
@@ -248,5 +280,30 @@
     
     @throw [CustomNativeAdError errorWithMessage:@"Could not record click on asset key. Propably no ad received yet." andCode:@"RECORD_AD_CLICK_FAILED"];;
 }
+
+#pragma mark AppTrackingTransparency
+
+- (void)requestIDFAWithCompletion: (void(^)(NSNumber * status))completion  {
+    if (@available(iOS 14, *)) {
+        [ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
+            self->cachedATTResult = [NSNumber numberWithUnsignedInteger:status];
+            completion(self->cachedATTResult);
+        }];
+    } else {
+        // Fallback on earlier versions
+        cachedATTResult = @1;
+        completion(@1);
+    }
+}
+
+- (void)requestCachedIDFAWithCompletion: (void(^)(NSNumber * status))completion  {
+    //if its not determined yet we should call it at least once
+    if(cachedATTResult.intValue == 0){
+        [self requestIDFAWithCompletion:completion];
+    }else{
+        completion(cachedATTResult);
+    }
+}
+
 
 @end

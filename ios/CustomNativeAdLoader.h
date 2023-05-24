@@ -35,6 +35,8 @@ typedef void (^AdLoaderCompletionBlock)(CustomNativeAdError* _Nullable error, GA
 - (void) loadRequest:(GAMRequest *)request WithCompletion: (AdLoaderCompletionBlock) completion;
 
 - (BOOL) setIsDisplaying;
+// used in combination with AdDisplayMeasurement
+- (BOOL) setIsDisplayingOnView: (UIView*) view;
 - (BOOL) recordImpression;
 
 - (void) setCustomClickHandler: (nullable GADNativeAdCustomClickHandler) handler;

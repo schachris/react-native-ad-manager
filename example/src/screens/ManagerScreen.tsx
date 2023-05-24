@@ -1,6 +1,17 @@
 import * as React from 'react';
 
-import { ActivityIndicator, Alert, Button, SafeAreaView, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Button,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
 import { AdManager } from 'react-native-ad-manager';
 
@@ -47,7 +58,7 @@ const styles = StyleSheet.create({
   },
 });
 
-AdManager.setTestDeviceIds(['4e18bd2fffe833d3ecc0c614e168aa10']);
+AdManager.setTestDeviceIds(['04bcd6e03ee509b9a05da233c7aaaa67']);
 
 export function ManagerScreen() {
   const [isLoadingAds, setIsLoading] = React.useState<{ [loaderId: string]: boolean | string }>({});
@@ -57,11 +68,35 @@ export function ManagerScreen() {
   const [loaderId, setLoaderId] = React.useState<string>('');
   const [assetKey, setAssetKey] = React.useState<string>('');
 
+  const [useATT, setUseATT] = React.useState(false);
+
+  const myAdRef = React.useRef<View>(null);
+
   return (
     <View style={styles.container}>
       <SafeAreaView />
       <LogBox logs={log} />
       <ScrollView style={styles.container}>
+        <Section>
+          <Button
+            title="requestATT"
+            onPress={async () => {
+              AdManager.requestAdTrackingTransparency((status) => {
+                addLog(`Requested ATT with Status: ${status}`);
+              });
+            }}
+          />
+        </Section>
+        <Section>
+          <Text>Should request ATT before load</Text>
+          <Switch
+            onValueChange={(val) => {
+              AdManager.setOnlyRequestAdsAfterATTFinished(val);
+              setUseATT(val);
+            }}
+            value={useATT}
+          />
+        </Section>
         <Section>
           <Button
             title="start"
@@ -201,6 +236,21 @@ export function ManagerScreen() {
               setIsLoading((loadings) => ({ ...loadings, [loaderId]: false }));
             }}
           />
+          <View collapsable={false} ref={myAdRef}>
+            <Button
+              title="setIsDisplayingOnViewForLoader"
+              onPress={async () => {
+                try {
+                  setIsLoading((loadings) => ({ ...loadings, [loaderId]: 'displaying' }));
+                  const result = await AdManager.setIsDisplayingOnViewForLoader(loaderId, myAdRef);
+                  addLog(`setIsDisplayingOnViewForLoader:`, result);
+                } catch (e) {
+                  addLog(`Error:`, (e as Error).message);
+                }
+                setIsLoading((loadings) => ({ ...loadings, [loaderId]: false }));
+              }}
+            />
+          </View>
         </Section>
         <Section>
           <ActivityIndicator animating={isLoadingAds[loaderId] === 'outdated'} color="blue" />
@@ -328,6 +378,19 @@ export function ManagerScreen() {
             placeholder={'loaderId'}
             clearButtonMode="while-editing"
             style={styles.textField}
+          />
+          <Button
+            title="destroyAdLoader"
+            onPress={async () => {
+              try {
+                setIsLoading((loadings) => ({ ...loadings, [loaderId]: 'click' }));
+                const onDestroy = await AdManager.destroyLoader(loaderId);
+                addLog(`destroyAdLoader:`, `destroy ${onDestroy}`);
+              } catch (e) {
+                addLog(`Error:`, (e as Error).message);
+              }
+              setIsLoading((loadings) => ({ ...loadings, [loaderId]: false }));
+            }}
           />
           <Button
             title="removeAdLoader"

@@ -1,6 +1,8 @@
 package com.admanager;
 
 import android.content.Context;
+import android.view.View;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,8 +12,10 @@ import com.facebook.react.bridge.UiThreadUtil;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MediaContent;
 import com.google.android.gms.ads.VideoOptions;
 import com.google.android.gms.ads.admanager.AdManagerAdRequest;
+import com.google.android.gms.ads.nativead.MediaView;
 import com.google.android.gms.ads.nativead.NativeAdOptions;
 import com.google.android.gms.ads.nativead.NativeCustomFormatAd;
 
@@ -55,7 +59,7 @@ public class CustomNativeAdLoader {
   }
 
   private void initBuilder() {
-    this.adLoaderBuilder = new AdLoader.Builder(this.reactApplicationContext, adUnitId);
+    this.adLoaderBuilder = new AdLoader.Builder(this.reactApplicationContext, this.getAdUnitId());
     this.adOptionBuilder = new NativeAdOptions.Builder();
   }
 
@@ -131,7 +135,9 @@ public class CustomNativeAdLoader {
     this.forceUpdateState(CustomNativeAdState.CustomNativeAdStateInit);
   }
 
-
+  public void destroy() {
+    this.clearup();
+  }
 
   public CustomNativeAdLoaderDetails getDetails() {
     CustomNativeAdLoaderDetails details = new CustomNativeAdLoaderDetails(this.loaderId, this.adUnitId, this.formatId, this._adState);
@@ -143,18 +149,23 @@ public class CustomNativeAdLoader {
     this.adLoaderBuilder.forCustomFormatAd(this.getFormatId(), new NativeCustomFormatAd.OnCustomFormatAdLoadedListener() {
       @Override
       public void onCustomFormatAdLoaded(@NonNull NativeCustomFormatAd nativeCustomFormatAd) {
-        // Show the custom format and record an impression.
-        CustomNativeAdLoader.this.receivedAd = nativeCustomFormatAd;
-        CustomNativeAdLoader.this.updateState(CustomNativeAdState.CustomNativeAdStateReceived);
-        CustomNativeAdLoader.this.adLoaderCompletionListener.onAdReceived(CustomNativeAdLoader.this, nativeCustomFormatAd);
-        CustomNativeAdLoader.this.adLoaderCompletionListener = null;
         // If this callback occurs after the activity is destroyed, you
         // must call destroy and return or you may get a memory leak.
         // Note `isDestroyed()` is a method on Activity.
         if (CustomNativeAdLoader.this.reactApplicationContext.getCurrentActivity().isDestroyed()) {
           nativeCustomFormatAd.destroy();
+          CustomNativeAdError error = CustomNativeAdError.withMessage("Current Activity", "FAILED_TO_RECEIVE_AD");
+          CustomNativeAdLoader.this.error = error;
+          CustomNativeAdLoader.this.updateState(CustomNativeAdState.CustomNativeAdStateError);
+          CustomNativeAdLoader.this.adLoaderCompletionListener.onAdLoadFailed(CustomNativeAdLoader.this, error);
+          CustomNativeAdLoader.this.adLoaderCompletionListener = null;
           return;
         }
+        // Show the custom format and record an impression.
+        CustomNativeAdLoader.this.receivedAd = nativeCustomFormatAd;
+        CustomNativeAdLoader.this.updateState(CustomNativeAdState.CustomNativeAdStateReceived);
+        CustomNativeAdLoader.this.adLoaderCompletionListener.onAdReceived(CustomNativeAdLoader.this, nativeCustomFormatAd);
+        CustomNativeAdLoader.this.adLoaderCompletionListener = null;
       }
     }, this.customClickListener);
     this.adLoaderBuilder.withNativeAdOptions(CustomNativeAdLoader.this.adOptionBuilder.build());
@@ -199,6 +210,74 @@ public class CustomNativeAdLoader {
       this.updateState(CustomNativeAdState.CustomNativeAdStateDisplaying);
     } else {
       throw CustomNativeAdError.withMessage("The ad is not ready to display.", "AD_NOT_DISPLAYABLE");
+    }
+  }
+
+  public void displayAdOnView(@Nullable View view) throws CustomNativeAdError {
+    if (this._adState.getValue() >= CustomNativeAdState.CustomNativeAdStateReceived.getValue()) {
+      if(this.receivedAd != null && view != null){
+        this.receivedAd.getDisplayOpenMeasurement().setView(view);
+        this.receivedAd.getDisplayOpenMeasurement().start();
+        this.updateState(CustomNativeAdState.CustomNativeAdStateDisplaying);
+      }else{
+        throw CustomNativeAdError.withMessage("The ad could not be displayed on the given view. The view was probably not found. You may add collapsable=false to resolve this issue.", "AD_NOT_DISPLAYABLE");
+      }
+    } else {
+      throw CustomNativeAdError.withMessage("The ad is not ready to display.", "AD_NOT_DISPLAYABLE");
+    }
+  }
+
+  private void displayVideo(@Nullable FrameLayout mediaPlaceholder) throws CustomNativeAdError {
+    //TODO: not implemented yet
+    MediaContent mediaContent = this.receivedAd.getMediaContent();
+    if(mediaContent != null && mediaContent.hasVideoContent()){
+      MediaView mediaView = new MediaView(mediaPlaceholder.getContext());
+      mediaView.setMediaContent(mediaContent);
+      mediaPlaceholder.addView(mediaView);
+      // Create a new VideoLifecycleCallbacks object and pass it to the VideoController. The
+      // VideoController will call methods on this object when events occur in the video
+      // lifecycle.
+      //    myNativeAd.getMediaContent().getVideoController()
+//      .setVideoLifecycleCallbacks(new VideoLifecycleCallbacks() {
+//
+//        /** Called when video playback first begins. */
+//        @Override
+//        public void onVideoStart() {
+//          // Do something when the video starts the first time.
+//          Log.d("MyApp", "Video Started");
+//        }
+//
+//        /** Called when video playback is playing. */
+//        @Override
+//        public void onVideoPlay() {
+//          // Do something when the video plays.
+//          Log.d("MyApp", "Video Played");
+//        }
+//
+//        /** Called when video playback is paused. */
+//        @Override
+//        public void onVideoPause() {
+//          // Do something when the video pauses.
+//          Log.d("MyApp", "Video Paused");
+//        }
+//
+//        /** Called when video playback finishes playing. */
+//        @Override
+//        public void onVideoEnd() {
+//          // Do something when the video ends.
+//          Log.d("MyApp", "Video Ended");
+//        }
+//
+//        /** Called when the video changes mute state. */
+//        @Override
+//        public void onVideoMute(boolean isMuted) {
+//          // Do something when the video is muted.
+//          Log.d("MyApp", "Video Muted");
+//        }
+//
+//      });
+    }else{
+      throw CustomNativeAdError.withMessage("The ad has no video to display.", "VIDEO_AD_NOT_DISPLAYABLE");
     }
   }
 

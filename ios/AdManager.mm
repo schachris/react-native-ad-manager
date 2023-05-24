@@ -1,3 +1,5 @@
+#import <React/RCTUIManager.h>
+
 #import "AdManager.h"
 #import "AdManagerController.h"
 #import "CustomNativeAdError.h"
@@ -7,6 +9,11 @@
     NSDictionary * defaultTargeting;
     bool hasListeners;
 }
+
+
+//@synthesize bridge = _bridge;
+@synthesize viewRegistry_DEPRECATED = _viewRegistry;
+@synthesize methodQueue = _methodQueue;
 
 RCT_EXPORT_MODULE()
 
@@ -66,6 +73,21 @@ RCT_REMAP_METHOD(setTestDeviceIds,
 {
     [AdManagerController setTestDeviceIds:testDeviceIds];
 }
+
+RCT_REMAP_METHOD(requestAdTrackingTransparency,
+                 requestAdTrackingTransparencyWithCallback:(RCTResponseSenderBlock)callback)
+{
+    [[AdManagerController main] requestIDFAWithCompletion:^(NSNumber * _Nonnull status) {
+        callback(@[status]);
+    }];
+}
+
+RCT_REMAP_METHOD(requestAdTrackingTransparencyBeforeAdLoad,
+                 requestAdTrackingTransparencyBeforeAdLoad: (BOOL) shouldRequestATT)
+{
+    [[AdManagerController main] setOnlyLoadRequestAfterATT:shouldRequestATT];
+}
+
 
 RCT_EXPORT_METHOD(start)
 {
@@ -215,6 +237,27 @@ RCT_REMAP_METHOD(setIsDisplayingForLoader,
     }
 }
 
+RCT_REMAP_METHOD(setIsDisplayingOnViewForLoader,
+                 setIsDisplayingForLoader: (NSString*) loaderId onView: (nonnull NSNumber *) viewTag
+                 withResolver:(RCTPromiseResolveBlock)resolve
+                 withRejecter:(RCTPromiseRejectBlock)reject)
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        @try{
+            UIView *view = [self.viewRegistry_DEPRECATED viewForReactTag:viewTag];
+            CustomNativeAdLoader * loader = [[AdManagerController main] setIsDisplayingOnView:view forLoader:loaderId];
+            dispatch_async(self->_methodQueue, ^{
+                resolve([self customNativeAdLoaderDetailsToDict: [loader getDetails]]);
+            });
+        }
+        @catch (CustomNativeAdError *error) {
+            dispatch_async(self->_methodQueue, ^{
+                [error insertIntoReactPromiseReject:reject];
+            });
+        }
+    });
+}
+
 RCT_REMAP_METHOD(recordImpression,
                  recordImpressionForLoaderId: (NSString *) loaderId
                  withResolver:(RCTPromiseResolveBlock)resolve
@@ -238,6 +281,20 @@ RCT_REMAP_METHOD(makeLoaderOutdated,
 {
     @try{
         CustomNativeAdLoader * loader = [[AdManagerController main] makeLoaderOutdated:loaderId];
+        resolve([self customNativeAdLoaderDetailsToDict: [loader getDetails]]);
+    }
+    @catch (CustomNativeAdError *error) {
+        [error insertIntoReactPromiseReject:reject];
+    }
+}
+
+RCT_REMAP_METHOD(destroyLoader,
+                 destroyLoader: (NSString*) loaderId
+                 withResolver:(RCTPromiseResolveBlock)resolve
+                 withRejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try{
+        CustomNativeAdLoader * loader = [[AdManagerController main] destroyLoader:loaderId];
         resolve([self customNativeAdLoaderDetailsToDict: [loader getDetails]]);
     }
     @catch (CustomNativeAdError *error) {
@@ -313,13 +370,36 @@ RCT_REMAP_METHOD(recordClick,
 }
 
 #pragma mark NewArch
+
 #ifdef RCT_NEW_ARCH_ENABLED
+- (void)requestAdTrackingTransparency:(RCTResponseSenderBlock)callback {
+    [[AdManagerController main] requestIDFAWithCompletion:^(NSNumber * _Nonnull status) {
+        callback(@[status]);
+    }];
+}
+
 - (void)createAdLoader:(JS::NativeAdManager::SpecCreateAdLoaderOptions &)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
     
-    std::optional<JS::NativeAdManager::SpecCreateAdLoaderOptionsVideoConfig> video = options.videoConfig();
-    //TODO: Make this work with the passed config
-    NSMutableDictionary * videoConfig = [NSMutableDictionary new];
-    GADVideoOptions *videoOptions = [AdManagerController getVideoOptions: videoConfig];
+    std::optional<JS::NativeAdManager::SpecCreateAdLoaderOptionsVideoConfig> videoConfig = options.videoConfig();
+    
+    GADVideoOptions *videoOptions = [[GADVideoOptions alloc] init];
+    if (videoConfig.has_value()) {
+        if (videoConfig.value().startMuted().has_value()) {
+            videoOptions.startMuted = videoConfig.value().startMuted().value();
+        }else {
+            videoOptions.startMuted = YES;
+        }
+        
+        if (videoConfig.value().customControlsRequested().has_value()) {
+            videoOptions.customControlsRequested = videoConfig.value().customControlsRequested().value();
+        }
+        
+        if (videoConfig.value().clickToExpandRequested().has_value()){
+            videoOptions.clickToExpandRequested = videoConfig.value().clickToExpandRequested().value();
+        }
+    }else{
+        videoOptions.startMuted = YES;
+    }
   
     @try {
         CustomNativeAdLoader * loader = [[AdManagerController main] createAdLoaderForAdUnitId:options.adUnitId() withFormatIds:RCTConvertVecToArray(options.formatIds()) andOptions:@[videoOptions]];
@@ -468,7 +548,38 @@ RCT_REMAP_METHOD(recordClick,
     }
 }
 
-#endif
++ (BOOL)requiresMainQueueSetup {
+    return NO;
+}
+
+- (void)setIsDisplayingOnViewForLoader:(NSString *)loaderId viewTag:(double)viewTag resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    NSNumber * viewId = [NSNumber numberWithInt:(int) viewTag];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        @try{
+            UIView *view = [self.viewRegistry_DEPRECATED viewForReactTag:viewId];
+            CustomNativeAdLoader * loader = [[AdManagerController main] setIsDisplayingOnView:view forLoader:loaderId];
+            dispatch_async(self->_methodQueue, ^{
+                resolve([self customNativeAdLoaderDetailsToDict: [loader getDetails]]);
+            });
+        }
+        @catch (CustomNativeAdError *error) {
+            dispatch_async(self->_methodQueue, ^{
+                [error insertIntoReactPromiseReject:reject];
+            });
+        }
+    });
+}
+
+- (void)destroyLoader:(NSString *)loaderId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    @try{
+        CustomNativeAdLoader * loader = [[AdManagerController main] destroyLoader:loaderId];
+        resolve([self customNativeAdLoaderDetailsToDict: [loader getDetails]]);
+    }
+    @catch (CustomNativeAdError *error) {
+        [error insertIntoReactPromiseReject:reject];
+    }
+}
+#endif //NewArch
 
 #pragma mark Send Events
 
@@ -485,7 +596,7 @@ RCT_REMAP_METHOD(recordClick,
 - (void)sendEvent:(NSString *)name body:(id)body
 {
   if (hasListeners) {
-    [self sendEventWithName:name body:body];
+//    [self sendEventWithName:name body:body];
   }
 }
 
@@ -493,7 +604,7 @@ RCT_REMAP_METHOD(recordClick,
     CustomNativeAdLoaderDetails details = [adLoader getDetails];
     NSMutableDictionary *data = [self customNativeAdLoaderDetailsToDict:details];
     [data setObject:@"assetKey" forKey:assetKey];
-    [self sendEventWithName:@"onAdClicked" body:data];
+    [self sendEvent:@"onAdClicked" body:data];
 }
 
 - (NSArray<NSString *> *)supportedEvents {
@@ -502,11 +613,12 @@ RCT_REMAP_METHOD(recordClick,
 
 - (void)removeListeners:(double)count {
     [[AdManagerController main] clearAllClickHandler];
-    [super removeListeners: count];
+//    [super removeListeners: count];
 }
 
 - (void)addListener:(NSString *)eventName {
-    [super addListener:eventName];
+//    [super addListener:eventName];
 }
+
 
 @end

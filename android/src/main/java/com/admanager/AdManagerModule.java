@@ -1,5 +1,7 @@
 package com.admanager;
 
+import android.view.View;
+
 import androidx.annotation.NonNull;
 
 import com.facebook.react.bridge.Arguments;
@@ -11,6 +13,10 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.uimanager.IllegalViewOperationException;
+import com.facebook.react.uimanager.NativeViewHierarchyManager;
+import com.facebook.react.uimanager.UIBlock;
+import com.facebook.react.uimanager.UIManagerModule;
 import com.google.android.gms.ads.admanager.AdManagerAdRequest;
 import com.google.android.gms.ads.nativead.NativeCustomFormatAd;
 
@@ -75,6 +81,19 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
 
   @ReactMethod
   @Override
+  public void requestAdTrackingTransparency(Callback callback) {
+    // this method is currently ios only so we "mock this and send an authorized code to the JS part"
+    callback.invoke(3);
+  }
+
+  @ReactMethod
+  @Override
+  public void requestAdTrackingTransparencyBeforeAdLoad(Boolean shouldRequestATT) {
+    // this method is ios only
+  }
+
+  @ReactMethod
+  @Override
   public void getAvailableAdLoaderIds(Promise promise) {
     promise.resolve(Utils.convertToWriteableArray(AdManagerImpl.main().getLoaderIds()));
   }
@@ -132,13 +151,6 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
     }
   }
 
-  private void sendClickEventForLoader(CustomNativeAdLoader loader, String assetKey) {
-    WritableMap data = loader.getDetails().toWriteableMap();
-    data.putString("assetKey", assetKey);
-    getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-      .emit("onAdClicked", data);
-  }
-
   @ReactMethod
   @Override
   public void setIsDisplayingForLoader(String loaderId, Promise promise) {
@@ -153,10 +165,46 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
 
   @ReactMethod
   @Override
+  public void setIsDisplayingOnViewForLoader(String loaderId, Integer viewTag, Promise promise) {
+    getReactApplicationContext().getNativeModule(UIManagerModule.class).addUIBlock(nativeViewHierarchyManager -> {
+      try {
+        View nativeAdViewContainer = null;
+        if (viewTag != -1) {
+          nativeAdViewContainer = nativeViewHierarchyManager.resolveView(viewTag);
+        }
+        CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
+        loader.displayAdOnView(nativeAdViewContainer);
+        promise.resolve(loader.getDetails().toWriteableMap());
+      } catch (ClassCastException e) {
+        promise.reject("E_CANNOT_CAST", e);
+      } catch (IllegalViewOperationException e) {
+        promise.reject("E_INVALID_TAG_ERROR", e);
+      } catch (NullPointerException e) {
+        promise.reject("E_NO_NATIVE_AD_VIEW", e);
+      }catch (CustomNativeAdError error){
+        error.insertIntoReactPromiseReject(promise);
+      }
+    });
+  }
+
+  @ReactMethod
+  @Override
   public void makeLoaderOutdated(String loaderId, Promise promise) {
     try{
       CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
       loader.makeOutdated();
+      promise.resolve(loader.getDetails().toWriteableMap());
+    }catch (CustomNativeAdError error){
+      error.insertIntoReactPromiseReject(promise);
+    }
+  }
+
+  @ReactMethod
+  @Override
+  public void destroyLoader(String loaderId, Promise promise) {
+    try{
+      CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
+      loader.destroy();
       promise.resolve(loader.getDetails().toWriteableMap());
     }catch (CustomNativeAdError error){
       error.insertIntoReactPromiseReject(promise);
@@ -186,6 +234,10 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
         loader.setCustomClickHandler((nativeCustomFormatAd, s) -> {
           sendClickEventForLoader(loader, s);
         });
+      }
+
+      if(options.hasKey("returnUrlsForImageAssets")) {
+        loader.setReturnUrlsForImageAssets(options.getBoolean("returnUrlsForImageAssets"));
       }
 
       loader.loadAd(adRequest, new CustomNativeAdLoaderHandler() {
@@ -252,4 +304,32 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
 //  public void multiply(double a, double b, Promise promise) {
 //    promise.resolve(a * b);
 //  }
+
+  private void sendClickEventForLoader(CustomNativeAdLoader loader, String assetKey) {
+    WritableMap data = loader.getDetails().toWriteableMap();
+    data.putString("assetKey", assetKey);
+    getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+      .emit("onAdClicked", data);
+  }
+
+  private int listenerCount = 0;
+  private boolean hasListeners = false;
+
+  @ReactMethod
+  public void addListener(String eventName) {
+    if (listenerCount == 0) {
+      // Set up any upstream listeners or background tasks as necessary
+    }
+    listenerCount += 1;
+    this.hasListeners = true;
+  }
+
+  @ReactMethod
+  public void removeListeners(Integer count) {
+    listenerCount -= count;
+    if (listenerCount == 0) {
+      // Remove upstream listeners, stop unnecessary background tasks
+      this.hasListeners = false;
+    }
+  }
 }

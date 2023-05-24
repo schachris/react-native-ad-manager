@@ -8,6 +8,7 @@
 #import <GoogleMobileAds/GoogleMobileAds.h>
 #import "CustomNativeAdLoader.h"
 #import "GADCustomNativeAd+Infos.h"
+#import <React/RCTLog.h>
 
 @interface CustomNativeAdLoader()<GADAdLoaderDelegate, GADCustomNativeAdLoaderDelegate, GADCustomNativeAdDelegate>
 
@@ -147,6 +148,24 @@
     }
 }
 
+- (BOOL) setIsDisplayingOnView: (UIView*) view {
+    if (self.receivedAd){
+        // Set the top-level native ad view on the GADNativeCustomTemplateAd so the
+        // Google Mobile Ads SDK can track viewability for that view.
+        self.receivedAd.displayAdMeasurement.view = view;
+        // Begin measuring your impressions and clicks.
+        NSError *error = nil;
+        [self.receivedAd.displayAdMeasurement startWithError:&error];
+        if (error) {
+            RCTLogInfo(@"Failed to start the display measurement.For loader %@", [self getLoaderId]);
+        }else{
+        }
+        return [self setIsDisplaying];
+    }
+    return NO;
+}
+
+
 - (BOOL) setIsDisplaying {
     if(self.receivedAd && self.currentState >= CustomNativeAdStateReceived){
         if(self.currentState <= CustomNativeAdStateDisplaying){
@@ -190,6 +209,9 @@
     [self updateState:CustomNativeAdStateOutdated];
 }
 
+- (void) destroy {
+    [self cleanup];
+}
 
 #pragma mark GADAdLoaderDelegate implementation
 

@@ -12,6 +12,13 @@ export type AdSpecification = {
   formatIds: string[];
 };
 
+export enum AdTrackingTransparencyStatus {
+  NotDetermined = 0,
+  Restricted = 1,
+  Denied = 2,
+  Authorized = 3,
+}
+
 export type GADAdRequestOptions<T = Record<string, string>> = {
   /**
    * Arbitrary object of custom targeting information.
@@ -44,6 +51,8 @@ export type GADAdRequestOptions<T = Record<string, string>> = {
   requestAgent?: string;
 
   neighboringContentURLStrings?: Record<string, string>;
+
+  returnUrlsForImageAssets?: boolean;
 };
 
 type GADAdapterStatus = {

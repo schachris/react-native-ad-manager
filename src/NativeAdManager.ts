@@ -1,11 +1,9 @@
 import type { TurboModule } from 'react-native';
 import { TurboModuleRegistry } from 'react-native';
 
-import type { UnsafeObject } from 'react-native/Libraries/Types/CodegenTypes';
+import type { Int32, UnsafeObject } from 'react-native/Libraries/Types/CodegenTypes';
 
 import type { AdState, GADNativeAdImageProps } from './types';
-
-export type CustomAdClickHandler = (result: { assetKey: string } & AdLoaderDetails<any>) => void;
 
 type AdAssets = Record<string, string | GADNativeAdImageProps>;
 
@@ -30,6 +28,9 @@ export interface Spec extends TurboModule {
   startWithCallback(callback: (status: UnsafeObject) => void): void;
   setTestDeviceIds(testDeviceIds: ReadonlyArray<string>): void;
 
+  requestAdTrackingTransparency(callback: (status: Int32) => void): void;
+  requestAdTrackingTransparencyBeforeAdLoad(shouldRequestATT: boolean): void;
+
   setCustomDefaultClickHandler(): Promise<void>;
   removeCustomDefaultClickHandler(): Promise<void>;
 
@@ -53,7 +54,12 @@ export interface Spec extends TurboModule {
   getAdLoaderDetails<AdFormatType>(adLoaderId: string): Promise<AdLoaderDetails<AdFormatType>>;
 
   setIsDisplayingForLoader<AdFormatType>(loaderId: string): Promise<AdLoaderDetails<AdFormatType>>;
+  setIsDisplayingOnViewForLoader<AdFormatType>(
+    loaderId: string,
+    viewTag: Int32
+  ): Promise<AdLoaderDetails<AdFormatType>>;
   makeLoaderOutdated<AdFormatType>(loaderId: string): Promise<AdLoaderDetails<AdFormatType>>;
+  destroyLoader<AdFormatType>(loaderId: string): Promise<AdLoaderDetails<AdFormatType>>;
 
   recordImpression<AdFormatType>(adLoaderId: string): Promise<AdLoaderDetails<AdFormatType>>;
 

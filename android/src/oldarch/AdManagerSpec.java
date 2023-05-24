@@ -19,17 +19,25 @@ abstract class AdManagerSpec extends ReactContextBaseJavaModule {
   public abstract void defaultTargeting(ReadableMap targeting);
   public abstract void removeCustomDefaultClickHandler(Promise promise);
   public abstract void setCustomDefaultClickHandler(Promise promise);
+
+
+  public abstract void requestAdTrackingTransparency(Callback callback);
+  public abstract void requestAdTrackingTransparencyBeforeAdLoad(Boolean shouldRequestATT);
+
   public abstract void getAvailableAdLoaderIds(Promise promise);
   public abstract void getAdLoaderDetails(String loaderId, Promise promise);
   public abstract void createAdLoader(ReadableMap options, Promise promise);
   public abstract void removeCustomClickHandlerForLoader(String loaderId, Promise promise);
   public abstract void setCustomClickHandlerForLoader(String loaderId, Promise promise) ;
   public abstract void setIsDisplayingForLoader(String loaderId, Promise promise) ;
+  public abstract void setIsDisplayingOnViewForLoader(String loaderId, Integer viewTag, Promise promise) ;
   public abstract void makeLoaderOutdated(String loaderId, Promise promise) ;
+  public abstract void destroyLoader(String loaderId, Promise promise) ;
   public abstract void removeAdLoader(String loaderId, Promise promise) ;
   public abstract void loadRequest(String loaderId, ReadableMap options, Promise promise);
   public abstract void recordImpression(String loaderId, Promise promise);
   public abstract void recordClickOnAssetKey(String loaderId, String assetKey, Promise promise);
   public abstract void recordClick(String loaderId, Promise promise);
+
 
 }

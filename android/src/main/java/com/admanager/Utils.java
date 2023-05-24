@@ -4,6 +4,7 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.google.android.gms.ads.MediaContent;
 import com.google.android.gms.ads.initialization.AdapterStatus;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.nativead.NativeCustomFormatAd;
@@ -32,6 +33,14 @@ public class Utils {
 
   public static WritableMap getAvailableAssets(NativeCustomFormatAd nativeCustomFormatAd) {
     WritableMap assets = Arguments.createMap();
+    MediaContent mediaContent = nativeCustomFormatAd.getMediaContent();
+    if (mediaContent != null && mediaContent.hasVideoContent()) {
+      WritableMap videoMap = Arguments.createMap();
+      videoMap.putDouble("duration", mediaContent.getDuration());
+      videoMap.putDouble("duration", mediaContent.getAspectRatio());
+      assets.putMap("video", videoMap);
+    }
+
     for (String adAssetName : nativeCustomFormatAd.getAvailableAssetNames()) {
       if (nativeCustomFormatAd.getText(adAssetName) != null) {
         assets.putString(adAssetName, nativeCustomFormatAd.getText(adAssetName).toString());

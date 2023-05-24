@@ -40,14 +40,19 @@ typedef void (^ReceivedAdBlock)(CustomNativeAdLoader* loader, GADCustomNativeAd*
 - (CustomNativeAdLoader *) loadRequest:(GAMRequest*) request forId:(NSString *) loaderId withSuccessHandler: (ReceivedAdBlock) successHandler andErrorHandler: (AdErrorBlock) errorHandler;
 - (CustomNativeAdLoader *) recordImpressionForId: (NSString *) loaderId;
 - (CustomNativeAdLoader *) setIsDisplayingForLoader: (NSString*) loaderId;
+- (CustomNativeAdLoader *) setIsDisplayingOnView: (UIView *) view forLoader: (NSString*) loaderId;
 - (CustomNativeAdLoader *) makeLoaderOutdated: (NSString*) loaderId;
+- (CustomNativeAdLoader *) destroyLoader: (NSString*) loaderId;
 
+- (void)requestIDFAWithCompletion: (void(^)(NSNumber * status))completion;
 
 - (CustomNativeAdLoader *) setCustomClickHandlerForLoader: (NSString*) loaderId clickHandler:(nullable GADNativeAdCustomClickHandler) handler;
 - (NSString *) forLoaderId: (NSString *) loaderId recordClickOnAssetKey: (nullable NSString *) assetKey withDefaultClickHandler: (nullable GADNativeAdCustomClickHandler) defaultClickHandler;
 
 - (void) clearAll;
 - (void) clearAllClickHandler;
+
+@property BOOL onlyLoadRequestAfterATT;
 
 @end
 

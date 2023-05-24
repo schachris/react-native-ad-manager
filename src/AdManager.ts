@@ -1,7 +1,7 @@
-import { EmitterSubscription, NativeEventEmitter, NativeModules, Platform } from 'react-native';
+import { EmitterSubscription, NativeEventEmitter, NativeModules, Platform, findNodeHandle } from 'react-native';
 
-import type { AdLoaderDetails, CustomAdClickHandler, Spec } from './NativeAdManager';
-import type { GADAdRequestOptions, GADInitializationStatus } from './types';
+import type { AdLoaderDetails, Spec } from './NativeAdManager';
+import type { AdTrackingTransparencyStatus, GADAdRequestOptions, GADInitializationStatus } from './types';
 
 const LINKING_ERROR =
   `The package 'react-native-ad-manager' doesn't seem to be linked. Make sure: \n\n` +
@@ -21,6 +21,8 @@ export const NativeAdManager: Spec = AdManagerModule
         throw new Error(LINKING_ERROR);
       },
     });
+
+export type CustomAdClickHandler = (result: { assetKey: string } & AdLoaderDetails<any>) => void;
 
 class AdManagerController {
   private emitter: NativeEventEmitter;
@@ -58,6 +60,14 @@ class AdManagerController {
 
   setTestDeviceIds(testDeviceIds: ReadonlyArray<string>) {
     return NativeAdManager.setTestDeviceIds(testDeviceIds);
+  }
+
+  requestAdTrackingTransparency(callback: (status: AdTrackingTransparencyStatus) => void) {
+    return NativeAdManager.requestAdTrackingTransparency(callback);
+  }
+
+  setOnlyRequestAdsAfterATTFinished(onlyLoadRequestsAfterATT: boolean) {
+    return NativeAdManager.requestAdTrackingTransparencyBeforeAdLoad(onlyLoadRequestsAfterATT);
   }
 
   clearAll() {
@@ -110,8 +120,23 @@ class AdManagerController {
   setIsDisplayingForLoader<AdFormatType>(loaderId: string) {
     return NativeAdManager.setIsDisplayingForLoader<AdFormatType>(loaderId);
   }
+
+  setIsDisplayingOnViewForLoader<AdFormatType>(loaderId: string, adViewRef: React.RefObject<any>) {
+    if (adViewRef && adViewRef.current) {
+      const adViewTag = findNodeHandle(adViewRef.current);
+      if (adViewTag) {
+        return NativeAdManager.setIsDisplayingOnViewForLoader<AdFormatType>(loaderId, adViewTag);
+      }
+    }
+    throw new Error('AdViewRef was not found or resolved in null value');
+  }
+
   makeLoaderOutdated<AdFormatType>(loaderId: string) {
     return NativeAdManager.makeLoaderOutdated<AdFormatType>(loaderId);
+  }
+
+  destroyLoader<AdFormatType>(loaderId: string) {
+    return NativeAdManager.destroyLoader<AdFormatType>(loaderId);
   }
 
   recordImpression<AdFormatType>(adLoaderId: string) {
