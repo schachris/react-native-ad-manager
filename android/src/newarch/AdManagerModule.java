@@ -14,13 +14,11 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.uimanager.IllegalViewOperationException;
-import com.facebook.react.uimanager.NativeViewHierarchyManager;
-import com.facebook.react.uimanager.UIBlock;
-import com.facebook.react.uimanager.UIManagerModule;
 import com.google.android.gms.ads.admanager.AdManagerAdRequest;
 import com.google.android.gms.ads.nativead.NativeCustomFormatAd;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public class AdManagerModule extends com.admanager.AdManagerSpec {
@@ -28,30 +26,31 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
 
   private ReadableMap _defaultTargeting;
   private boolean hasCustomClickHandler = false;
+  private final ReactApplicationContext reactContext;
 
   AdManagerModule(ReactApplicationContext context) {
     super(context);
     this._defaultTargeting = null;
+
+    this.reactContext = context;
   }
 
   @ReactMethod
-  @Override
   public void start() {
     AdManagerImpl.start(this.getReactApplicationContext());
   }
 
   @ReactMethod
-  @Override
   public void clearAll() {
     AdManagerImpl.main().clearAll();
   }
 
-  @Override
+  @ReactMethod
   public void startWithCallback(Callback callback) {
     AdManagerImpl.startWithCallback(this.getReactApplicationContext(), initializationStatus -> callback.invoke(Utils.initializationStatusToMap(initializationStatus)));
   }
 
-  @Override
+  @ReactMethod
   public void setTestDeviceIds(ReadableArray testDeviceIds) {
     List<String> deviceIds = Utils.convertReadableArrayToStringArray(testDeviceIds);
     AdManagerImpl.setTestDeviceIds(deviceIds);
@@ -62,40 +61,35 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
   }
 
   @ReactMethod
-  @Override
   public void removeCustomDefaultClickHandler(Promise promise) {
     this.hasCustomClickHandler = false;
     promise.resolve(null);
   }
 
   @ReactMethod
-  @Override
   public void setCustomDefaultClickHandler(Promise promise) {
     this.hasCustomClickHandler = true;
     promise.resolve(null);
   }
 
   @ReactMethod
-  @Override
   public void requestAdTrackingTransparency(Callback callback) {
     // this method is currently ios only so we "mock this and send an authorized code to the JS part"
     callback.invoke(3);
   }
 
-  @Override
+  @ReactMethod
   public void requestAdTrackingTransparencyBeforeAdLoad(boolean shouldRequestATT) {
     // this method is ios only
 
   }
 
   @ReactMethod
-  @Override
   public void getAvailableAdLoaderIds(Promise promise) {
     promise.resolve(Utils.convertToWriteableArray(AdManagerImpl.main().getLoaderIds()));
   }
 
   @ReactMethod
-  @Override
   public void getAdLoaderDetails(String loaderId, Promise promise) {
     try {
       CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
@@ -106,7 +100,6 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
   }
 
   @ReactMethod
-  @Override
   public void createAdLoader(ReadableMap options, Promise promise) {
     try{
       String adUnitId = options.getString("adUnitId");
@@ -122,7 +115,6 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
   }
 
   @ReactMethod
-  @Override
   public void removeCustomClickHandlerForLoader(String loaderId, Promise promise) {
     try{
       CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
@@ -134,7 +126,6 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
   }
 
   @ReactMethod
-  @Override
   public void setCustomClickHandlerForLoader(String loaderId, Promise promise) {
     try{
       CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
@@ -148,7 +139,6 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
   }
 
   @ReactMethod
-  @Override
   public void setIsDisplayingForLoader(String loaderId, Promise promise) {
     try{
       CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
@@ -159,30 +149,32 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
     }
   }
 
-  @Override
+
+  @ReactMethod
   public void setIsDisplayingOnViewForLoader(String loaderId, double viewTag, Promise promise) {
-    getReactApplicationContext().getNativeModule(UIManagerModule.class).addUIBlock(nativeViewHierarchyManager -> {
-      try {
-        View nativeAdViewContainer = null;
-        if (viewTag != -1) {
-          nativeAdViewContainer = nativeViewHierarchyManager.resolveView((int) viewTag);
-        }
-        CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
-        loader.displayAdOnView(nativeAdViewContainer);
-        promise.resolve(loader.getDetails().toWriteableMap());
-      } catch (ClassCastException e) {
-        promise.reject("E_CANNOT_CAST", e);
-      } catch (IllegalViewOperationException e) {
-        promise.reject("E_INVALID_TAG_ERROR", e);
-      } catch (NullPointerException e) {
-        promise.reject("E_NO_NATIVE_AD_VIEW", e);
-      }catch (CustomNativeAdError error){
-        error.insertIntoReactPromiseReject(promise);
+    try {
+      View nativeAdViewContainer = null;
+      if (viewTag != -1) {
+        nativeAdViewContainer = this.getReactApplicationContext().getCurrentActivity().findViewById((int) viewTag);
       }
-    });
+      CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
+      loader.displayAdOnView(nativeAdViewContainer);
+      promise.resolve(loader.getDetails().toWriteableMap());
+    } catch (ClassCastException e) {
+      promise.reject("E_CANNOT_CAST", e);
+    } catch (IllegalViewOperationException e) {
+      promise.reject("E_INVALID_TAG_ERROR", e);
+    } catch (NullPointerException e) {
+      promise.reject("E_NO_NATIVE_AD_VIEW", e);
+    } catch (CustomNativeAdError error) {
+      error.insertIntoReactPromiseReject(promise);
+    } catch (Throwable error) {
+      CustomNativeAdError.fromError(error, "UNKNOWN_ERROR").insertIntoReactPromiseReject(promise);
+    }
   }
 
-  @Override
+
+  @ReactMethod
   public void makeLoaderOutdated(String loaderId, Promise promise) {
     try{
       CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
@@ -193,7 +185,8 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
     }
   }
 
-  @Override
+
+  @ReactMethod
   public void destroyLoader(String loaderId, Promise promise) {
     try{
       CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
@@ -205,7 +198,8 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
   }
 
 
-  @Override
+
+  @ReactMethod
   public void removeAdLoader(String loaderId, Promise promise) {
     try{
       Set<String> remainingIds = AdManagerImpl.main().removeAdLoaderForId(loaderId);
@@ -215,7 +209,8 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
     }
   }
 
-  @Override
+
+  @ReactMethod
   public void loadRequest(String loaderId, ReadableMap options, Promise promise) {
     try{
       CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
@@ -251,7 +246,8 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
     }
   }
 
-  @Override
+
+  @ReactMethod
   public void recordImpression(String loaderId, Promise promise) {
     try{
       CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
@@ -262,7 +258,8 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
     }
   }
 
-  @Override
+
+  @ReactMethod
   public void recordClickOnAssetKey(String loaderId, String assetKey, Promise promise) {
     try{
       CustomNativeAdLoader loader = AdManagerImpl.main().getAdLoaderForId(loaderId);
@@ -275,7 +272,8 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
     }
   }
 
-  @Override
+
+  @ReactMethod
   public void recordClick(String loaderId, Promise promise) {
     this.recordClickOnAssetKey(loaderId, null, promise);
   }

@@ -157,7 +157,7 @@
         NSError *error = nil;
         [self.receivedAd.displayAdMeasurement startWithError:&error];
         if (error) {
-            RCTLogInfo(@"Failed to start the display measurement.For loader %@", [self getLoaderId]);
+            RCTLogWarn(@"Failed to start the display measurement.For loader %@", [self getLoaderId]);
         }else{
         }
         return [self setIsDisplaying];

@@ -1,6 +1,6 @@
 package com.admanager;
 
-import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -217,7 +217,11 @@ public class CustomNativeAdLoader {
     if (this._adState.getValue() >= CustomNativeAdState.CustomNativeAdStateReceived.getValue()) {
       if(this.receivedAd != null && view != null){
         this.receivedAd.getDisplayOpenMeasurement().setView(view);
-        this.receivedAd.getDisplayOpenMeasurement().start();
+        boolean result = this.receivedAd.getDisplayOpenMeasurement().start();
+        if(result == false){
+          Log.w("ReactNativeAdManager", "The ad could not be displayed on the given view. The view was found but displayOpenMeasurement failed.");
+//          throw CustomNativeAdError.withMessage("", "AD_DISPLAY_MEASUREMENT_FAILED");
+        }
         this.updateState(CustomNativeAdState.CustomNativeAdStateDisplaying);
       }else{
         throw CustomNativeAdError.withMessage("The ad could not be displayed on the given view. The view was probably not found. You may add collapsable=false to resolve this issue.", "AD_NOT_DISPLAYABLE");

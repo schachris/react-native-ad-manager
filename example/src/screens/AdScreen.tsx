@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Button, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Button, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 // import { AdQueueLoader, GADNativeAdImageProps } from 'react-native-ad-manager';
 import { LogBox } from '../components/LogBox';
@@ -50,12 +50,12 @@ const styles = StyleSheet.create({
 //   },
 // });
 export function AdScreen() {
-  const [counter, _setCounter] = React.useState(0);
+  const [counter, setCounter] = React.useState(0);
   const [log] = React.useState<any[]>([]);
   // const addLog = (...addedLogs: any[]) => setLog((logs) => [...logs, '\n', ...addedLogs]);
   const [delay, setDelay] = React.useState(true);
   React.useEffect(() => {
-    setInterval(() => {
+    setTimeout(() => {
       setDelay(false);
     }, 100);
   }, []);
@@ -76,7 +76,9 @@ export function AdScreen() {
         <Text>{counter}</Text>
         <Button
           onPress={() => {
-            // setCounter((c) => c + 1);
+            setCounter((c) => c + 1);
+            Alert.alert('Hallo stinkpo');
+            return false;
             // if (counter < 1) {
             //   queueLoader.setOptions({
             //     targeting: {

@@ -100,7 +100,7 @@ export function ManagerScreen() {
         <Section>
           <Button
             title="start"
-            onPress={async () => {
+            onPress={() => {
               AdManager.start();
               addLog(`started`);
             }}
@@ -236,7 +236,7 @@ export function ManagerScreen() {
               setIsLoading((loadings) => ({ ...loadings, [loaderId]: false }));
             }}
           />
-          <View collapsable={false} ref={myAdRef}>
+          <View collapsable={false} style={{ backgroundColor: 'red', padding: 2 }} ref={myAdRef}>
             <Button
               title="setIsDisplayingOnViewForLoader"
               onPress={async () => {
@@ -307,17 +307,6 @@ export function ManagerScreen() {
             }}
           />
         </Section>
-        <Section>
-          <ActivityIndicator animating={isLoadingAds[loaderId] === 'clickCustom'} color="blue" />
-          <TextInput
-            onChangeText={setAssetKey}
-            value={assetKey}
-            placeholder={'assetKey'}
-            clearButtonMode="while-editing"
-            style={styles.textField}
-          />
-        </Section>
-
         <Section>
           <TextInput
             onChangeText={setLoaderId}
