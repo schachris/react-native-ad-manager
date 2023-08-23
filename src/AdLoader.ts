@@ -1,7 +1,7 @@
 import { AdManager } from './AdManager';
 import type { AdLoaderDetails } from './NativeAdManager';
 import { AdSpecification, AdState, GADAdRequestOptions } from './types';
-import { adStateToString } from './utils';
+import { PackageConfig, adStateToString } from './utils';
 
 let i = 0;
 function sleep(ms: number) {
@@ -18,6 +18,8 @@ export class AdLoader<AdFormatType, AdTargetingOptions = Record<string, string>>
   private id?: string;
   private error?: Error;
   private requestOptions: GADAdRequestOptions<AdTargetingOptions> | undefined;
+
+  public errorHandler?: (loader: AdLoader<AdFormatType, AdTargetingOptions>, error: Error) => void;
 
   constructor(
     options: AdSpecification,
@@ -43,9 +45,9 @@ export class AdLoader<AdFormatType, AdTargetingOptions = Record<string, string>>
       i++;
       if (i > 1 && i < 3) {
         await sleep(7000);
-        throw new Error('FAil');
+        throw new Error('Intended FAil after 7s because i=' + i);
       } else if (i > 6 && i < 9) {
-        throw new Error('FAil');
+        throw new Error('Intended FAil because i=' + i);
       }
       const { targeting, ...load_details } = await AdManager.loadRequest<AdFormatType, AdTargetingOptions>(
         details.id,
@@ -86,6 +88,9 @@ export class AdLoader<AdFormatType, AdTargetingOptions = Record<string, string>>
     this.state = newState;
     this.log(`updateState ${adStateToString(newState)}`);
     this.onStateChangeHandler?.(newState);
+    if (newState === AdState.Error) {
+      this.errorHandler?.(this, this.getError()!);
+    }
   }
 
   display() {
@@ -146,6 +151,13 @@ export class AdLoader<AdFormatType, AdTargetingOptions = Record<string, string>>
       });
   }
 
+  async destroy() {
+    try {
+      await AdManager.destroyLoader<AdFormatType>(this.getRequestId()!);
+      await AdManager.removeAdLoader(this.getRequestId()!);
+    } catch (e) {}
+  }
+
   getRequestId() {
     return this.adLoaderInfos?.id;
   }
@@ -159,7 +171,7 @@ export class AdLoader<AdFormatType, AdTargetingOptions = Record<string, string>>
   }
 
   log(...props: any[]) {
-    if (__DEV__) {
+    if (PackageConfig.logging) {
       console.log(`${this.id} ${this.getRequestId()} | `, ...props);
     }
   }

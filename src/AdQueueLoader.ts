@@ -1,6 +1,14 @@
 import { AdLoader } from './AdLoader';
 import { Queue } from './Queue';
 import type { AdSpecification, GADAdRequestOptions } from './types';
+import { PackageConfig } from './utils';
+
+function guidGenerator() {
+  var S4 = function () {
+    return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+  };
+  return S4() + S4() + '-' + S4() + '-' + S4() + S4() + S4();
+}
 
 export class AdQueueLoader<AdFormatType, AdTargetingOptions = Record<string, string>> extends Queue<
   AdLoader<AdFormatType, AdTargetingOptions>
@@ -23,7 +31,9 @@ export class AdQueueLoader<AdFormatType, AdTargetingOptions = Record<string, str
   }
 
   public setOptions(options: GADAdRequestOptions<AdTargetingOptions> | undefined) {
-    console.log('##### SET OPTIONS', options);
+    if (PackageConfig.logging) {
+      console.log('##### SET OPTIONS', this.specification, options);
+    }
     this.requestOptions = options;
     this.clear();
   }
@@ -36,8 +46,17 @@ export class AdQueueLoader<AdFormatType, AdTargetingOptions = Record<string, str
     this.refillQueue();
   }
 
+  public reload(): void {
+    this.clear();
+    // this will cause a onSizeChanged call
+    // => so we do not need to refillQueue here again
+  }
+
   private refillQueue() {
     const missing = this.minNumberOfItems - this.size();
+    if (PackageConfig.logging) {
+      console.log('##### refill', this.specification, missing);
+    }
     for (let index = 0; index < missing; index++) {
       const ad = new AdLoader<AdFormatType, AdTargetingOptions>(
         this.specification,
@@ -47,11 +66,4 @@ export class AdQueueLoader<AdFormatType, AdTargetingOptions = Record<string, str
       this.items.push(ad);
     }
   }
-}
-
-function guidGenerator() {
-  var S4 = function () {
-    return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-  };
-  return S4() + S4() + '-' + S4() + '-' + S4() + S4() + S4();
 }

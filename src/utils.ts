@@ -27,3 +27,7 @@ export function adStateToString(state: AdState) {
       return 'outdated';
   }
 }
+
+export const PackageConfig = {
+  logging: __DEV__,
+};

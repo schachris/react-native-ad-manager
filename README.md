@@ -12,8 +12,29 @@ npm install react-native-ad-manager
 
 ## Usage
 
+This package is for extreme flexibility.
+Its a wrapper around [Google Ad Manager - Mobile Ads SDK](https://developers.google.com/ad-manager/mobile-ads-sdk) for ios and android. It tries to pass the core functionality to JS
+
 ```js
-import 'react-native-ad-manager';
+import {AdManager, useCustomNativeAd, useVisibleCustomNativeAd} from 'react-native-ad-manager';
+
+const adLoader = new AdQueueLoader<CustomAdFormat, CustomTargeting>(adSpecification, {
+      length: 1,
+    });
+
+const {
+    id,
+    ad,
+    state: adState,
+    display,
+    renew,
+    impression,
+    click,
+    outdated,
+    targeting,
+    tracker,
+  } = useCustomNativeAd(adLoader);
+
 
 // ...
 ```

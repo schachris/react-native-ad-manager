@@ -1,0 +1,87 @@
+import React, { useCallback, useState } from 'react';
+
+import { StyleProp, Text, View, ViewStyle } from 'react-native';
+
+import { type AdQueueLoader, CustomNativeAdHookReturnType, useVisibleCustomNativeAd } from 'react-native-ad-manager';
+import { VisibilityAwareView } from 'react-native-visibility-aware-view';
+
+type CustomAdContext<AdFormatType, Targeting> = CustomNativeAdHookReturnType<AdFormatType, Targeting> & {
+  visible: boolean;
+};
+
+const Context: React.Context<CustomAdContext<any, any>> = React.createContext<CustomAdContext<any, any>>({} as any);
+export function useAd<F>() {
+  return React.useContext<CustomAdContext<F, any>>(Context).ad;
+}
+export function useAdState<F>() {
+  return React.useContext<CustomAdContext<F, any>>(Context).state;
+}
+export function useAdClick<F>() {
+  return React.useContext<CustomAdContext<F, any>>(Context).click;
+}
+export function useAdImpressionTracker<F>() {
+  return React.useContext<CustomAdContext<F, any>>(Context).tracker.impressions;
+}
+
+export function useCustomNativeAdContext<F, T>() {
+  return React.useContext<CustomAdContext<F, T>>(Context);
+}
+
+export function CustomNativeAdContainer<T>({
+  children,
+  adLoader,
+  style,
+  msToDisplayTillImpressionRecording = 2000,
+  msToDisplayTillRenew = 30 * 1000,
+  identifier,
+}: {
+  style?: StyleProp<ViewStyle>;
+  children?: React.ReactNode;
+  adLoader: AdQueueLoader<T, any>;
+  msToDisplayTillImpressionRecording?: number;
+  msToDisplayTillRenew?: number;
+  identifier: string;
+}) {
+  const [visible, setVisibility] = useState<boolean>(false);
+  const onBecomeVisible = useCallback(() => {
+    setVisibility(true);
+  }, [setVisibility]);
+  const onBecomeInvisible = useCallback(() => {
+    setVisibility(false);
+  }, [setVisibility]);
+
+  const result = useVisibleCustomNativeAd({
+    visible,
+    msToDisplayTillRenew,
+    msToDisplayTillImpressionRecording,
+    adLoader,
+    log: identifier,
+  });
+
+  return (
+    <VisibilityAwareView
+      minVisibleArea={0.9}
+      style={style}
+      onBecomeVisible={onBecomeVisible}
+      onBecomeInvisible={onBecomeInvisible}
+    >
+      {__DEV__ ? (
+        <View>
+          <Text>{visible ? 'visible' : 'invis'}</Text>
+          <Text>{result.id}</Text>
+          <Text>{JSON.stringify(result.tracker)}</Text>
+          <Text>Targeting: {JSON.stringify(result.targeting || {})}</Text>
+        </View>
+      ) : undefined}
+      <Context.Provider
+        value={{
+          ...result,
+          visible,
+        }}
+      >
+        {children}
+      </Context.Provider>
+      <Text>{visible ? 'visible' : 'invis'}</Text>
+    </VisibilityAwareView>
+  );
+}

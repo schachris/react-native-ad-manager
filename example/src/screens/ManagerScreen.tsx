@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   },
 });
 
-AdManager.setTestDeviceIds(['04bcd6e03ee509b9a05da233c7aaaa67']);
+AdManager.setTestDeviceIds(['04bcd6e03ee509b9a05da233c7aaaa67', '35E1B7A3E2AF29464C3E3B5F21E8FC7B']);
 
 export function ManagerScreen() {
   const [isLoadingAds, setIsLoading] = React.useState<{ [loaderId: string]: boolean | string }>({});

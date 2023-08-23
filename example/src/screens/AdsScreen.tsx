@@ -98,12 +98,8 @@ function MyCustomAd() {
     </View>
   );
 }
-// queueLoader.setOptions({
-//   targeting: {
-//     t: 'd',
-//   },
-// });
-export function AdScreen() {
+
+export function AdsScreen() {
   const queueRef = React.useRef<AdQueueLoader<CustomAdFormat, CustomTargeting> | null>(null);
 
   if (!queueRef.current) {
@@ -183,22 +179,20 @@ export function AdScreen() {
           }}
           title="Update Targeting"
         />
+        <CustomNativeAdContainer adLoader={queueLoader} identifier={'CustomNativeAdContainer'}>
+          <MyCustomAd />
+          <AdStateView />
+        </CustomNativeAdContainer>
         <View style={{ height: 500 }} />
         <View style={styles.section}>
-          <CustomNativeAd<CustomAdFormat, CustomTargeting>
-            {...adSpecification}
-            style={{ backgroundColor: 'gray' }}
-            adLoader={queueLoader}
-            identifier="CustomNativeAd"
-          >
-            {({ ad, state, click, visible, targeting, id, tracker }) => {
+          <CustomNativeAd<CustomAdFormat, CustomTargeting> {...adSpecification} adLoader={queueLoader}>
+            {({ ad, state, click, visible, targeting, id }) => {
               const { title, subtitle, titleIcon, contentImage, callToActionSubtitle, callToActionTitle } =
                 ad?.assets || {};
               const common = (
                 <>
-                  <Text>{visible ? 'visible' : 'invisible'}</Text>
+                  <Text>{visible ? 'visible' : 'invis'}</Text>
                   <Text>{id}</Text>
-                  <Text>{JSON.stringify(tracker)}</Text>
                   <Text>Targeting: {JSON.stringify(targeting || {})}</Text>
                 </>
               );
@@ -217,7 +211,6 @@ export function AdScreen() {
                     click();
                   }}
                 >
-                  <Text>visible {String(visible)}</Text>
                   {common}
 
                   <View style={[styles.fakeAd, {}]}>
