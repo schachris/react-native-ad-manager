@@ -173,5 +173,6 @@
     "name": "RNAdManagerSpec",
     "type": "modules",
     "jsSrcsDir": "src"
-  }
+  },
+  "dependencies": {}
 }
