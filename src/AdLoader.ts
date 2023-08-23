@@ -3,11 +3,6 @@ import type { AdLoaderDetails } from './NativeAdManager';
 import { AdSpecification, AdState, GADAdRequestOptions } from './types';
 import { PackageConfig, adStateToString } from './utils';
 
-let i = 0;
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 export class AdLoader<AdFormatType, AdTargetingOptions = Record<string, string>> {
   private specification: AdSpecification;
 
@@ -42,13 +37,7 @@ export class AdLoader<AdFormatType, AdTargetingOptions = Record<string, string>>
       this.id = details.id;
       this.adLoaderInfos = details;
       this.updateState(AdState.Loading);
-      i++;
-      if (i > 1 && i < 3) {
-        await sleep(7000);
-        throw new Error('Intended FAil after 7s because i=' + i);
-      } else if (i > 6 && i < 9) {
-        throw new Error('Intended FAil because i=' + i);
-      }
+
       const { targeting, ...load_details } = await AdManager.loadRequest<AdFormatType, AdTargetingOptions>(
         details.id,
         this.requestOptions || {
