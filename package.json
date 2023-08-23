@@ -1,5 +1,5 @@
 {
-  "name": "react-native-admanager",
+  "name": "react-native-admanager-mobile-ads",
   "version": "0.0.0",
   "description": "test",
   "main": "lib/commonjs/index",
@@ -42,13 +42,13 @@
     "ios",
     "android"
   ],
-  "repository": "https://github.com/schachris/react-native-admanager.git",
+  "repository": "https://github.com/schachris/react-native-admanager-mobile-ads.git",
   "author": "Christian Schaffrath <mail@christianschaffrath.de> (https://www.christianschaffrath.de)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/schachris/react-native-admanager.git/issues"
+    "url": "https://github.com/schachris/react-native-admanager-mobile-ads.git/issues"
   },
-  "homepage": "https://github.com/schachris/react-native-admanager.git#readme",
+  "homepage": "https://github.com/schachris/react-native-admanager-mobile-ads.git#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
