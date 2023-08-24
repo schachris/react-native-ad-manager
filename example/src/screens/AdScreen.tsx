@@ -13,15 +13,9 @@ import {
 } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
-import { AdQueueLoader, AdState, GADNativeAdImageProps, adStateToString } from 'react-native-ad-manager';
+import { AdQueueLoader, AdState, GADNativeAdImageProps } from 'react-native-admanager-mobile-ads';
 
 import { CustomNativeAd } from '../components/CustomNativeAd';
-import {
-  CustomNativeAdContainer,
-  useAd,
-  useAdImpressionTracker,
-  useAdState,
-} from '../components/CustomNativeAdContainer';
 import { LogBox } from '../components/LogBox';
 
 const styles = StyleSheet.create({
@@ -61,48 +55,6 @@ const adSpecification = {
   formatIds,
 };
 
-function AdStateView() {
-  const adState = useAdState();
-  const impressions = useAdImpressionTracker();
-  return (
-    <View>
-      <Text>{`Impressions: ${impressions}`}</Text>
-      <Text>{adStateToString(adState)}</Text>
-    </View>
-  );
-}
-
-function MyCustomAd() {
-  const ad = useAd<CustomAdFormat>();
-  if (!ad) {
-    return <ActivityIndicator />;
-  }
-  return (
-    <View>
-      {ad.assets.titleIcon ? (
-        <Image
-          source={{ uri: ad.assets.titleIcon.uri }}
-          style={{
-            width: 40,
-            height: 40,
-          }}
-        />
-      ) : undefined}
-      <Text>{ad.assets.title}</Text>
-      <Text>{ad.assets.subtitle}</Text>
-      {ad.assets.contentImage ? (
-        <Image source={{ uri: ad.assets.contentImage.uri }} style={{ width: '100%', aspectRatio: 3.2 }} />
-      ) : undefined}
-      <Text>{ad.assets.callToActionTitle}</Text>
-      <Text>{ad.assets.callToActionSubtitle}</Text>
-    </View>
-  );
-}
-// queueLoader.setOptions({
-//   targeting: {
-//     t: 'd',
-//   },
-// });
 export function AdScreen() {
   const queueRef = React.useRef<AdQueueLoader<CustomAdFormat, CustomTargeting> | null>(null);
 

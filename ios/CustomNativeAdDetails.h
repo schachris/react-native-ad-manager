@@ -1,6 +1,6 @@
 //
 //  CustomNativeAdLoaderDetails.h
-//  react-native-ad-manager
+//  react-native-admanager-mobile-ads
 //
 //  Created by Christian Schaffrath on 19.05.23.
 //

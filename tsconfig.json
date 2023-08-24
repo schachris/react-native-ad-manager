@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "react-native-ad-manager": ["./src/index"]
+      "react-native-admanager-mobile-ads": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

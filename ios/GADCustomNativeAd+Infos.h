@@ -1,6 +1,6 @@
 //
 //  GADCustomNativeAd+Infos.h
-//  react-native-ad-manager
+//  react-native-admanager-mobile-ads
 //
 //  Created by Christian Schaffrath on 18.05.23.
 //

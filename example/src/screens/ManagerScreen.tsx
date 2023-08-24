@@ -13,7 +13,7 @@ import {
   View,
 } from 'react-native';
 
-import { AdManager } from 'react-native-ad-manager';
+import { AdManager } from 'react-native-admanager-mobile-ads';
 
 import { LogBox } from '../components/LogBox';
 import { Section } from '../components/Section';

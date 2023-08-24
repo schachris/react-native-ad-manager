@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 
 import { type StyleProp, Text, type ViewStyle } from 'react-native';
 
-import { CustomNativeAdHookReturnType, useVisibleCustomNativeAd } from 'react-native-ad-manager';
+import { CustomNativeAdHookReturnType, useVisibleCustomNativeAd } from 'react-native-admanager-mobile-ads';
 import { VisibilityAwareView } from 'react-native-visibility-aware-view';
 
 import type { AdQueueLoader } from '../../../src/AdQueueLoader';

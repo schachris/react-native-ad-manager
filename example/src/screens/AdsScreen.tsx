@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
-import { AdQueueLoader, AdState, GADNativeAdImageProps, adStateToString } from 'react-native-ad-manager';
+import { AdQueueLoader, AdState, GADNativeAdImageProps, adStateToString } from 'react-native-admanager-mobile-ads';
 
 import { CustomNativeAd } from '../components/CustomNativeAd';
 import {

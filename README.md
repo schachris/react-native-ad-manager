@@ -1,4 +1,4 @@
-# react-native-ad-manager
+# react-native-admanager-mobile-ads
 
 ![Supports iOS and Android][support-badge]
 
@@ -7,7 +7,7 @@ Google Mobile Ads Custom Native Formats wrapper
 ## Installation
 
 ```sh
-npm install react-native-ad-manager
+npm install react-native-admanager-mobile-ads
 ```
 
 ## Usage
@@ -16,7 +16,7 @@ This package is for extreme flexibility.
 Its a wrapper around [Google Ad Manager - Mobile Ads SDK](https://developers.google.com/ad-manager/mobile-ads-sdk) for ios and android. It tries to pass the core functionality to JS
 
 ```js
-import {AdManager, useCustomNativeAd, useVisibleCustomNativeAd} from 'react-native-ad-manager';
+import {AdManager, useCustomNativeAd, useVisibleCustomNativeAd} from 'react-native-admanager-mobile-ads';
 
 const adLoader = new AdQueueLoader<CustomAdFormat, CustomTargeting>(adSpecification, {
       length: 1,
