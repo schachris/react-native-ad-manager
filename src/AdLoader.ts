@@ -1,7 +1,7 @@
 import { AdManager } from './AdManager';
 import type { AdLoaderDetails } from './NativeAdManager';
 import { AdSpecification, AdState, GADAdRequestOptions } from './types';
-import { PackageConfig, adStateToString } from './utils';
+import { PackageConfig, adStateToString, logInfo } from './utils';
 
 export class AdLoader<AdFormatType, AdTargetingOptions = Record<string, string>> {
   private specification: AdSpecification;
@@ -44,6 +44,7 @@ export class AdLoader<AdFormatType, AdTargetingOptions = Record<string, string>>
           targeting: undefined,
         }
       );
+
       this.adLoaderInfos = load_details;
       this.usedTargeting = targeting;
       this.updateState(load_details.state);
@@ -160,9 +161,15 @@ export class AdLoader<AdFormatType, AdTargetingOptions = Record<string, string>>
     return `ReqId: ${this.getRequestId() || this.id} State: ${adStateToString(this.state)}`;
   }
 
-  log(...props: any[]) {
-    if (PackageConfig.logging) {
-      console.log(`${this.id} ${this.getRequestId()} | `, ...props);
-    }
+  log(name: string, ...props: any[]) {
+    logInfo(
+      PackageConfig.logging,
+      {
+        ...this.specification,
+        identifier: this.id,
+      },
+      name,
+      ...props
+    );
   }
 }

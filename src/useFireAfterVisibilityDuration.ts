@@ -46,6 +46,7 @@ export function useFireAfterVisibilityDuration(
       } else {
         lastTimestamp.current = undefined;
       }
+
       if (PackageConfig.logging) {
         console.log(
           'useEffect useFireAfterVisibilityDuration active:',

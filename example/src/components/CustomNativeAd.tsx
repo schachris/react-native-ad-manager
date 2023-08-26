@@ -11,7 +11,7 @@ export type CustomNativeAdProps<AdFormatType, Targeting> = {
   children?: (props: CustomNativeAdHookReturnType<AdFormatType, Targeting> & { visible: boolean }) => React.ReactNode;
   style?: StyleProp<ViewStyle>;
 
-  adLoader?: AdQueueLoader<AdFormatType, Targeting>;
+  adLoader: AdQueueLoader<AdFormatType, Targeting>;
   msToDisplayTillImpressionRecording?: number;
   msToDisplayTillRenew?: number;
 
@@ -23,7 +23,7 @@ export function CustomNativeAd<AdFormatType, Targeting>(props: CustomNativeAdPro
     children,
     adLoader,
     style,
-    msToDisplayTillImpressionRecording = 12000,
+    msToDisplayTillImpressionRecording = 2000,
     msToDisplayTillRenew = 30 * 1000,
     identifier,
   } = props;
@@ -41,7 +41,8 @@ export function CustomNativeAd<AdFormatType, Targeting>(props: CustomNativeAdPro
     msToDisplayTillRenew,
     msToDisplayTillImpressionRecording,
     adLoader,
-    log: identifier,
+    log: !!identifier,
+    identifier,
   });
 
   return (

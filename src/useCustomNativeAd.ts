@@ -4,7 +4,7 @@ import { AdLoader } from './AdLoader';
 import type { AdQueueLoader } from './AdQueueLoader';
 import type { AdDetails } from './NativeAdManager';
 import { AdState } from './types';
-import { PackageConfig } from './utils';
+import { PackageConfig, adStateToString, logInfo } from './utils';
 
 export type AdSpecification = {
   adUnitId: string;
@@ -29,34 +29,36 @@ export type AdReceived<AdFormatType> = {
   targeting?: Record<string, string>;
 };
 
-export type AdImpressionRecorded<AdFormatType> = {
+export type AdImpressionRecorded<AdFormatType, Targeting> = {
   ad: AdDetails<AdFormatType>;
   state: AdState.Impression;
-  targeting?: Record<string, string>;
+  targeting?: Targeting;
 };
 
-export type AdClicked<AdFormatType> = {
+export type AdClicked<AdFormatType, Targeting> = {
   ad: AdDetails<AdFormatType>;
   state: AdState.Clicked;
-  targeting?: Record<string, string>;
+  targeting?: Targeting;
 };
 
-export type AdOutdated<AdFormatType> = {
+export type AdOutdated<AdFormatType, Targeting> = {
   ad: AdDetails<AdFormatType>;
   state: AdState.Outdated;
-  targeting?: Record<string, string>;
+  targeting?: Targeting;
 };
 
-type AdStates<AdFormatType> =
+type AdStates<AdFormatType, Targeting> =
   | AdLoading
   | AdError
   | AdReceived<AdFormatType>
   | AdDisplaying<AdFormatType>
-  | AdImpressionRecorded<AdFormatType>
-  | AdClicked<AdFormatType>
-  | AdOutdated<AdFormatType>;
+  | AdImpressionRecorded<AdFormatType, Targeting>
+  | AdClicked<AdFormatType, Targeting>
+  | AdOutdated<AdFormatType, Targeting>;
 
-function getAdState<AdFormatType>(ad?: AdLoader<AdFormatType>): AdStates<AdFormatType> {
+function getAdState<AdFormatType, Targeting>(
+  ad?: AdLoader<AdFormatType, Targeting>
+): AdStates<AdFormatType, Targeting> {
   if (ad) {
     const state = ad.getState();
     if (state === AdState.Init) {
@@ -74,7 +76,7 @@ function getAdState<AdFormatType>(ad?: AdLoader<AdFormatType>): AdStates<AdForma
         ad: ad.getInfos()!.ad!,
         targeting: ad.getTargeting(),
         state,
-      };
+      } as AdStates<AdFormatType, Targeting>;
     }
   }
   return {
@@ -83,53 +85,61 @@ function getAdState<AdFormatType>(ad?: AdLoader<AdFormatType>): AdStates<AdForma
   };
 }
 
-function getOne<AdFormatType, Targeting>(
-  config:
-    | AdSpecification
-    | {
-        loader?: AdQueueLoader<AdFormatType, Targeting>;
-      },
-  instanceId?: string
-) {
-  const { loader, adUnitId, formatIds } = config as AdSpecification & {
-    loader: AdQueueLoader<AdFormatType>;
-  };
+function getOne<AdFormatType, Targeting>(config: {
+  loader: AdQueueLoader<AdFormatType, Targeting>;
+  instanceId?: string;
+}) {
+  const { loader, instanceId } = config;
+  const specification = loader.getSpecification();
+  const { adUnitId, formatIds } = specification;
   const possibleAd = loader.dequeue();
-  if (PackageConfig.logging) {
-    console.log(possibleAd?.getId(), 'Get Initial');
-  }
+  logInfo(
+    PackageConfig.logging,
+    {
+      ...specification,
+      identifier: instanceId,
+    },
+    'getOne',
+    possibleAd ? adStateToString(possibleAd.getState()) : 'create adloader'
+  );
 
   if (possibleAd) {
     return possibleAd;
   }
-  return new AdLoader<AdFormatType>(
+  const options = loader.getOptions();
+  return new AdLoader<AdFormatType, Targeting>(
     {
-      adUnitId: adUnitId || loader!.getSpecification().adUnitId,
-      formatIds: formatIds || loader!.getSpecification().formatIds,
+      adUnitId,
+      formatIds,
     },
-    undefined,
+    options,
     instanceId
   );
 }
 
 export function useCustomNativeAd<AdFormatType, Targeting>(
   queue: AdQueueLoader<AdFormatType, Targeting>,
-  log: boolean | string = false
+  options?: {
+    renew_attempts?: number;
+    log?: boolean;
+    identifier?: string;
+  }
 ) {
+  const { renew_attempts = 2, log = false, identifier = 'useCustomNativeAd' } = options || {};
   const tracker = useRef<{ renew_counter: number; renew_afterError: number; impressions: number }>({
     renew_counter: 0,
     renew_afterError: 0,
     impressions: 0,
   });
-  const ref = useRef<AdLoader<AdFormatType>>();
+  const ref = useRef<AdLoader<AdFormatType, Targeting>>();
   if (!ref.current) {
-    ref.current = getOne({ loader: queue });
+    ref.current = getOne<AdFormatType, Targeting>({ loader: queue, instanceId: identifier });
   }
-  const [state, setState] = useState<AdStates<AdFormatType>>(getAdState(ref.current));
+  const [state, setState] = useState<AdStates<AdFormatType, Targeting>>(getAdState(ref.current));
   useEffect(() => {
     if (ref.current) {
       ref.current.onStateChangeHandler = () => {
-        const adState = getAdState<AdFormatType>(ref.current);
+        const adState = getAdState<AdFormatType, Targeting>(ref.current);
         setState(adState);
       };
     }
@@ -142,32 +152,54 @@ export function useCustomNativeAd<AdFormatType, Targeting>(
     };
   }, []);
 
-  const upcomingAdRef = useRef<AdLoader<AdFormatType>>();
+  const upcomingAdRef = useRef<AdLoader<AdFormatType, Targeting>>();
   const renew = useCallback(() => {
-    if (__DEV__ && log) {
-      console.log(log, 'do renew', tracker.current, upcomingAdRef.current);
-    }
-    const renew_attempts = 2;
+    logInfo(
+      log,
+      {
+        ...queue.getSpecification(),
+        identifier,
+      },
+      'renew action',
+      'tracker:',
+      tracker.current,
+      'upcoming:',
+      upcomingAdRef.current
+    );
+
     if (!upcomingAdRef.current) {
       tracker.current.renew_counter += 1;
       const newAd = getOne({ loader: queue });
       const newAdState = newAd.getState();
-      if (__DEV__ && log) {
-        console.log(log, 'get new adstate:', newAdState);
-      }
+
+      logInfo(
+        log,
+        {
+          ...queue.getSpecification(),
+          identifier,
+        },
+        'get new adstate',
+        newAdState
+      );
       if (newAdState === AdState.Init || newAdState === AdState.Loading) {
         upcomingAdRef.current = newAd;
         upcomingAdRef.current!.onStateChangeHandler = (newState) => {
-          if (__DEV__ && log) {
-            console.log(log, 'legacy onStateChangeHandler', newState);
-          }
+          logInfo(
+            log,
+            {
+              ...queue.getSpecification(),
+              identifier,
+            },
+            'legacy upcoming onStateChangeHandler',
+            adStateToString(newState)
+          );
           if (upcomingAdRef.current) {
             if (newState === AdState.Error) {
               upcomingAdRef.current.onStateChangeHandler = undefined;
               upcomingAdRef.current = undefined;
               //   renew_tracker.current.afterError += 1;
               //   if (renew_tracker.current.afterError < renew_attempts) {
-              //     console.log('call renew');
+              //     console.log('admanager-mobile-ads:''call renew');
               //     renew();
               //   }
             } else if (newState === AdState.Received) {
@@ -196,18 +228,28 @@ export function useCustomNativeAd<AdFormatType, Targeting>(
       } else {
         tracker.current.renew_afterError += 1;
         if (tracker.current.renew_afterError < renew_attempts) {
-          if (__DEV__ && log) {
-            console.log(log, 'call renew error');
-          }
+          logInfo(
+            log,
+            {
+              ...queue.getSpecification(),
+              identifier,
+            },
+            'call renew error'
+          );
           renew();
         }
       }
     } else {
-      if (__DEV__ && log) {
-        console.log(log, 'blocked...something running already');
-      }
+      logInfo(
+        log,
+        {
+          ...queue.getSpecification(),
+          identifier,
+        },
+        'blocked...something running already'
+      );
     }
-  }, [queue, log]);
+  }, [queue, log, renew_attempts, identifier]);
 
   const outdated = useCallback(() => {
     ref.current?.makeOutdated();
@@ -250,7 +292,7 @@ export type CustomNativeAdHookReturnType<AdFormatType, T> = {
   display: () => void;
   impression: () => void;
   outdated: () => void;
-  renew: () => void;
+  renew: (targeting?: T) => void;
   targeting: T;
   tracker: {
     renew_counter: number;

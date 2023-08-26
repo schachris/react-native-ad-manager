@@ -59,7 +59,8 @@ export function CustomNativeAdContainer<T>({
     msToDisplayTillRenew,
     msToDisplayTillImpressionRecording,
     adLoader,
-    log: identifier,
+    log: true,
+    identifier,
   });
 
   return (

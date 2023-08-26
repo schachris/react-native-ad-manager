@@ -144,7 +144,7 @@ export function AdScreen() {
             adLoader={queueLoader}
             identifier="CustomNativeAd"
           >
-            {({ ad, state, click, visible, targeting, id, tracker }) => {
+            {({ ad, state, click, visible, targeting, id, tracker, error }) => {
               const { title, subtitle, titleIcon, contentImage, callToActionSubtitle, callToActionTitle } =
                 ad?.assets || {};
               const common = (
@@ -153,6 +153,7 @@ export function AdScreen() {
                   <Text>{id}</Text>
                   <Text>{JSON.stringify(tracker)}</Text>
                   <Text>Targeting: {JSON.stringify(targeting || {})}</Text>
+                  <Text>Error: {error?.toString()}</Text>
                 </>
               );
               if (state < AdState.Received) {

@@ -1,7 +1,7 @@
 import { AdLoader } from './AdLoader';
 import { Queue } from './Queue';
 import type { AdSpecification, GADAdRequestOptions } from './types';
-import { PackageConfig } from './utils';
+import { PackageConfig, logInfo } from './utils';
 
 function guidGenerator() {
   var S4 = function () {
@@ -31,11 +31,13 @@ export class AdQueueLoader<AdFormatType, AdTargetingOptions = Record<string, str
   }
 
   public setOptions(options: GADAdRequestOptions<AdTargetingOptions> | undefined) {
-    if (PackageConfig.logging) {
-      console.log('##### SET OPTIONS', this.specification, options);
-    }
+    logInfo(PackageConfig.logging, this.specification, 'setOptions', options);
     this.requestOptions = options;
     this.clear();
+  }
+
+  public getOptions() {
+    return this.requestOptions;
   }
 
   public getSpecification() {
@@ -54,9 +56,8 @@ export class AdQueueLoader<AdFormatType, AdTargetingOptions = Record<string, str
 
   private refillQueue() {
     const missing = this.minNumberOfItems - this.size();
-    if (PackageConfig.logging) {
-      console.log('##### refill', this.specification, missing);
-    }
+    logInfo(PackageConfig.logging, this.specification, 'refill', `missing: ${missing}`);
+
     for (let index = 0; index < missing; index++) {
       const ad = new AdLoader<AdFormatType, AdTargetingOptions>(
         this.specification,

@@ -4,20 +4,24 @@ import type { AdQueueLoader } from './AdQueueLoader';
 import { AdState } from './types';
 import { CustomNativeAdHookReturnType, useCustomNativeAd } from './useCustomNativeAd';
 import { useFireAfterVisibilityDuration } from './useFireAfterVisibilityDuration';
-import { adStateToString } from './utils';
+import { adStateToString, logInfo } from './utils';
 
 export function useVisibleCustomNativeAd<AdFormatType, Targeting>({
   visible,
   adLoader,
   msToDisplayTillImpressionRecording = 2000,
   msToDisplayTillRenew = 30 * 1000,
+  renew_attempts,
   log = false,
+  identifier,
 }: {
   visible: boolean;
-  adLoader?: AdQueueLoader<AdFormatType, Targeting>;
+  adLoader: AdQueueLoader<AdFormatType, Targeting>;
   msToDisplayTillImpressionRecording?: number;
   msToDisplayTillRenew?: number;
-  log?: boolean | string;
+  renew_attempts?: number;
+  log?: boolean;
+  identifier?: string;
 }): CustomNativeAdHookReturnType<AdFormatType, Targeting> {
   const {
     id,
@@ -31,26 +35,31 @@ export function useVisibleCustomNativeAd<AdFormatType, Targeting>({
     targeting,
     tracker,
     error,
-  } = useCustomNativeAd(adLoader!, log);
+  } = useCustomNativeAd(adLoader!, {
+    renew_attempts,
+    log,
+    identifier,
+  });
 
   useEffect(() => {
-    if (__DEV__ && log) {
-      console.log(log, 'updateEffect state:', adStateToString(adState), 'visible:', visible);
-    }
+    logInfo(
+      log,
+      { ...adLoader.getSpecification(), identifier },
+      'updateEffect',
+      adStateToString(adState),
+      'visible:',
+      visible
+    );
     if (adState === AdState.Received && visible) {
       display();
     } else if (adState === AdState.Error) {
-      if (__DEV__ && log) {
-        console.log(log, 'RENEW error');
-      }
+      logInfo(log, { ...adLoader.getSpecification(), identifier }, 'error -> renew');
       renew();
     } else if (visible && adState === AdState.Outdated) {
-      if (__DEV__ && log) {
-        console.log(log, 'RENEW outdated');
-      }
+      logInfo(log, { ...adLoader.getSpecification(), identifier }, 'outdated -> renew');
       renew();
     }
-  }, [adState, visible, renew, display, log]);
+  }, [adState, visible, renew, display, log, adLoader, identifier]);
 
   const isMinDisplaying = adState >= AdState.Displaying;
   const isMinImpression = adState >= AdState.Impression;
