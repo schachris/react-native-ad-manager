@@ -50,6 +50,7 @@ export class AdLoader<AdFormatType, AdTargetingOptions = Record<string, string>>
       return details.id;
     } catch (e) {
       this.log(`load failed`, (e as Error)?.message);
+      this.error = e as Error;
       this.updateState(AdState.Error);
     }
     return undefined;

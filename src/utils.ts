@@ -29,5 +29,5 @@ export function adStateToString(state: AdState) {
 }
 
 export const PackageConfig = {
-  logging: __DEV__,
+  logging: false,
 };

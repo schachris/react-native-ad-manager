@@ -60,6 +60,7 @@ export function AdScreen() {
 
   if (!queueRef.current) {
     queueRef.current = new AdQueueLoader<CustomAdFormat, CustomTargeting>(adSpecification, {
+      //Always keep 1 item in the loader
       length: 1,
     });
   }

@@ -18,6 +18,7 @@ export type AdLoading = {
 
 export type AdError = {
   state: AdState.Error;
+  error?: Error;
 };
 
 export type AdDisplaying<AdFormatType> = { ad: AdDetails<AdFormatType>; state: AdState.Displaying };
@@ -77,6 +78,7 @@ function getAdState<AdFormatType>(ad?: AdLoader<AdFormatType>): AdStates<AdForma
     }
   }
   return {
+    error: ad?.getError(),
     state: AdState.Error,
   };
 }
@@ -229,6 +231,7 @@ export function useCustomNativeAd<AdFormatType, Targeting>(
     id: ref.current.getId(),
     ad: (state as AdReceived<AdFormatType>).ad || undefined,
     targeting: (state as AdReceived<AdFormatType>).targeting,
+    error: (state as AdError).error,
     display,
     outdated,
     impression,
@@ -242,6 +245,7 @@ export type CustomNativeAdHookReturnType<AdFormatType, T> = {
   state: AdState;
   id: string;
   ad?: AdDetails<AdFormatType>;
+  error?: Error;
   click: (assetKey?: string) => void;
   display: () => void;
   impression: () => void;

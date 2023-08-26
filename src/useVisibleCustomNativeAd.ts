@@ -30,6 +30,7 @@ export function useVisibleCustomNativeAd<AdFormatType, Targeting>({
     outdated,
     targeting,
     tracker,
+    error,
   } = useCustomNativeAd(adLoader!, log);
 
   useEffect(() => {
@@ -72,5 +73,6 @@ export function useVisibleCustomNativeAd<AdFormatType, Targeting>({
     outdated,
     targeting,
     tracker,
+    error,
   };
 }
