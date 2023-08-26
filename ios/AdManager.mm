@@ -164,9 +164,12 @@ RCT_REMAP_METHOD(createAdLoader,
     
     NSDictionary * videoConfig = [options objectForKey:@"videoOptions"];
     GADVideoOptions *videoOptions = [AdManagerController getVideoOptions: videoConfig];
+    
+    NSDictionary * imageConfig = [options objectForKey:@"imageOptions"];
+    GADNativeAdImageAdLoaderOptions *imageOptions = [AdManagerController getImageOptions: imageConfig];
   
     @try {
-        CustomNativeAdLoader * loader = [[AdManagerController main] createAdLoaderForAdUnitId:adUnitId withFormatIds:formatIds andOptions:@[videoOptions]];
+        CustomNativeAdLoader * loader = [[AdManagerController main] createAdLoaderForAdUnitId:adUnitId withFormatIds:formatIds andOptions:@[videoOptions, imageOptions]];
         resolve([self customNativeAdLoaderDetailsToDict: [loader getDetails]]);
     }
     @catch (CustomNativeAdError *error) {
@@ -381,6 +384,24 @@ RCT_REMAP_METHOD(recordClick,
 - (void)createAdLoader:(JS::NativeAdManager::SpecCreateAdLoaderOptions &)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
     
     std::optional<JS::NativeAdManager::SpecCreateAdLoaderOptionsVideoConfig> videoConfig = options.videoConfig();
+    std::optional<JS::NativeAdManager::SpecCreateAdLoaderOptionsImageConfig> imageConfig = options.imageConfig();
+
+    
+    GADNativeAdImageAdLoaderOptions *imageOptions = [[GADNativeAdImageAdLoaderOptions alloc] init];
+    if(imageConfig.has_value()) {
+        if (imageConfig.value().disableImageLoading().has_value()) {
+            imageOptions.disableImageLoading = imageConfig.value().disableImageLoading().value();
+        }else {
+            imageOptions.disableImageLoading = NO;
+        }
+        
+        if (imageConfig.value().shouldRequestMultipleImages().has_value()) {
+            imageConfig.shouldRequestMultipleImages = imageConfig.value().shouldRequestMultipleImages().value();
+        }
+    }else{
+        imageOptions.disableImageLoading = NO;
+    }
+    
     
     GADVideoOptions *videoOptions = [[GADVideoOptions alloc] init];
     if (videoConfig.has_value()) {
@@ -402,7 +423,7 @@ RCT_REMAP_METHOD(recordClick,
     }
   
     @try {
-        CustomNativeAdLoader * loader = [[AdManagerController main] createAdLoaderForAdUnitId:options.adUnitId() withFormatIds:RCTConvertVecToArray(options.formatIds()) andOptions:@[videoOptions]];
+        CustomNativeAdLoader * loader = [[AdManagerController main] createAdLoaderForAdUnitId:options.adUnitId() withFormatIds:RCTConvertVecToArray(options.formatIds()) andOptions:@[videoOptions, imageOptions]];
         resolve([self customNativeAdLoaderDetailsToDict: [loader getDetails]]);
     }
     @catch (CustomNativeAdError *error) {

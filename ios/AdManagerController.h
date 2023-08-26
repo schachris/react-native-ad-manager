@@ -26,6 +26,8 @@ typedef void (^ReceivedAdBlock)(CustomNativeAdLoader* loader, GADCustomNativeAd*
 
 + (void) startGoogleMobileAdsSDK:(nullable GADInitializationCompletionHandler) completionHandler;
 + (GADVideoOptions *) getVideoOptions: (NSDictionary*) options;
++ (GADNativeAdImageAdLoaderOptions *) getImageOptions: (NSDictionary*) options;
+
 + (GAMRequest *) getRequestWithOptions: (NSDictionary*) options andDefaultTargeting: (NSDictionary<NSString *, NSString *> *) defaultTargeting;
 + (void) setTestDeviceIds: (NSArray *) testDeviceIds;
 

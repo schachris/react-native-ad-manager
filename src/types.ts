@@ -52,7 +52,12 @@ export type GADAdRequestOptions<T = Record<string, string>> = {
 
   neighboringContentURLStrings?: Record<string, string>;
 
+  /**
+   * Android only
+   * ios is handled differently. See AdManager for more details.
+   */
   returnUrlsForImageAssets?: boolean;
+  requestMultipleImages?: boolean;
 };
 
 type GADAdapterStatus = {

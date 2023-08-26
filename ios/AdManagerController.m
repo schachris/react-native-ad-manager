@@ -57,6 +57,25 @@
     return videoOptions;
 }
 
++ (GADNativeAdImageAdLoaderOptions *) getImageOptions: (NSDictionary*) options {
+    GADNativeAdImageAdLoaderOptions *imageOptions = [[GADNativeAdImageAdLoaderOptions alloc] init];
+    imageOptions.disableImageLoading = NO;
+    if (options != nil) {
+        BOOL disableImageLoading = [options objectForKey:@"disableImageLoading"];
+        if (disableImageLoading == YES) {
+            imageOptions.disableImageLoading = YES;
+        }else {
+            imageOptions.disableImageLoading = NO;
+        }
+        
+        BOOL shouldRequestMultipleImages = [options objectForKey:@"shouldRequestMultipleImages"];
+        if (shouldRequestMultipleImages == YES){
+            imageOptions.shouldRequestMultipleImages = shouldRequestMultipleImages;
+        }
+    }
+    return imageOptions;
+}
+
 + (GAMRequest *) getRequestWithOptions: (NSDictionary*) options andDefaultTargeting: (NSDictionary<NSString *, NSString *> *) defaultTargeting {
     GAMRequest *request = [GAMRequest request];
     

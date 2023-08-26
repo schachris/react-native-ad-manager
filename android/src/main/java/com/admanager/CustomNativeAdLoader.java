@@ -106,6 +106,9 @@ public class CustomNativeAdLoader {
   public void setReturnUrlsForImageAssets(Boolean shouldSet) {
     this.adOptionBuilder.setReturnUrlsForImageAssets(shouldSet);
   }
+  public void setRequestMultipleImages(Boolean shouldSet) {
+    this.adOptionBuilder.setRequestMultipleImages(shouldSet);
+  }
 
   public void removeCustomClickHandler() throws CustomNativeAdError {
     if (this._adState.getValue() <= CustomNativeAdState.CustomNativeAdStateLoading.getValue()) {

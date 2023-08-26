@@ -95,6 +95,10 @@ class AdManagerController {
       customControlsRequested?: boolean;
       clickToExpandRequested?: boolean;
     };
+    imageConfig?: {
+      disableImageLoading?: boolean;
+      shouldRequestMultipleImages?: boolean;
+    };
   }) {
     return NativeAdManager.createAdLoader<AdFormatType>(options);
   }

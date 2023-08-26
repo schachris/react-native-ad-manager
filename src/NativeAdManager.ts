@@ -42,6 +42,14 @@ export interface Spec extends TurboModule {
       customControlsRequested?: boolean;
       clickToExpandRequested?: boolean;
     };
+    /**
+     * iOS only as android is managed differently
+     * see GADAdRequestOptions for Android config
+     */
+    imageConfig?: {
+      disableImageLoading?: boolean;
+      shouldRequestMultipleImages?: boolean;
+    };
   }): Promise<AdLoaderDetails<AdFormatType>>;
   loadRequest<AdFormatType, AdTargetingOptions = Record<string, string>>(
     adLoaderId: string,

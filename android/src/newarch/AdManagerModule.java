@@ -226,6 +226,9 @@ public class AdManagerModule extends com.admanager.AdManagerSpec {
       if(options.hasKey("returnUrlsForImageAssets")) {
         loader.setReturnUrlsForImageAssets(options.getBoolean("returnUrlsForImageAssets"));
       }
+      if(options.hasKey("requestMultipleImages")) {
+        loader.setRequestMultipleImages(options.getBoolean("requestMultipleImages"));
+      }
 
       loader.loadAd(adRequest, new CustomNativeAdLoaderHandler() {
         @Override
