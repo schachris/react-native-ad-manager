@@ -1,5 +1,6 @@
 package com.admanager;
 
+import android.app.Activity;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -152,24 +153,34 @@ public class CustomNativeAdLoader {
     this.adLoaderBuilder.forCustomFormatAd(this.getFormatId(), new NativeCustomFormatAd.OnCustomFormatAdLoadedListener() {
       @Override
       public void onCustomFormatAdLoaded(@NonNull NativeCustomFormatAd nativeCustomFormatAd) {
-        // If this callback occurs after the activity is destroyed, you
-        // must call destroy and return or you may get a memory leak.
-        // Note `isDestroyed()` is a method on Activity.
-        if (CustomNativeAdLoader.this.reactApplicationContext.getCurrentActivity().isDestroyed()) {
-          nativeCustomFormatAd.destroy();
-          CustomNativeAdError error = CustomNativeAdError.withMessage("Current Activity", "FAILED_TO_RECEIVE_AD");
-          CustomNativeAdLoader.this.error = error;
-          CustomNativeAdLoader.this.updateState(CustomNativeAdState.CustomNativeAdStateError);
-          CustomNativeAdLoader.this.adLoaderCompletionListener.onAdLoadFailed(CustomNativeAdLoader.this, error);
+          // If this callback occurs after the activity is destroyed, you
+          // must call destroy and return or you may get a memory leak.
+          // Note `isDestroyed()` is a method on Activity.
+          Activity activity = CustomNativeAdLoader.this.reactApplicationContext.getCurrentActivity();
+          if(activity == null) {
+            nativeCustomFormatAd.destroy();
+            CustomNativeAdError error = CustomNativeAdError.withMessage("Current Activity is null", "FAILED_TO_RECEIVE_AD");
+            CustomNativeAdLoader.this.error = error;
+            CustomNativeAdLoader.this.updateState(CustomNativeAdState.CustomNativeAdStateError);
+            CustomNativeAdLoader.this.adLoaderCompletionListener.onAdLoadFailed(CustomNativeAdLoader.this, error);
+            CustomNativeAdLoader.this.adLoaderCompletionListener = null;
+            return;
+          }
+          if (activity.isDestroyed()) {
+            nativeCustomFormatAd.destroy();
+            CustomNativeAdError error = CustomNativeAdError.withMessage("Current Activity is destroyed", "FAILED_TO_RECEIVE_AD");
+            CustomNativeAdLoader.this.error = error;
+            CustomNativeAdLoader.this.updateState(CustomNativeAdState.CustomNativeAdStateError);
+            CustomNativeAdLoader.this.adLoaderCompletionListener.onAdLoadFailed(CustomNativeAdLoader.this, error);
+            CustomNativeAdLoader.this.adLoaderCompletionListener = null;
+            return;
+          }
+          // Show the custom format and record an impression.
+          CustomNativeAdLoader.this.receivedAd = nativeCustomFormatAd;
+          CustomNativeAdLoader.this.updateState(CustomNativeAdState.CustomNativeAdStateReceived);
+          CustomNativeAdLoader.this.adLoaderCompletionListener.onAdReceived(CustomNativeAdLoader.this, nativeCustomFormatAd);
           CustomNativeAdLoader.this.adLoaderCompletionListener = null;
-          return;
         }
-        // Show the custom format and record an impression.
-        CustomNativeAdLoader.this.receivedAd = nativeCustomFormatAd;
-        CustomNativeAdLoader.this.updateState(CustomNativeAdState.CustomNativeAdStateReceived);
-        CustomNativeAdLoader.this.adLoaderCompletionListener.onAdReceived(CustomNativeAdLoader.this, nativeCustomFormatAd);
-        CustomNativeAdLoader.this.adLoaderCompletionListener = null;
-      }
     }, this.customClickListener);
     this.adLoaderBuilder.withNativeAdOptions(CustomNativeAdLoader.this.adOptionBuilder.build());
     this.adLoaderBuilder.withAdListener(new AdListener() {
