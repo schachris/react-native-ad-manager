@@ -376,7 +376,7 @@ PODS:
   - React-jsinspector (0.71.7)
   - React-logger (0.71.7):
     - glog
-  - react-native-admanager-mobile-ads (0.1.0):
+  - react-native-admanager-mobile-ads (0.2.0):
     - Google-Mobile-Ads-SDK
     - React-Core
   - react-native-safe-area-context (4.5.3):
@@ -686,7 +686,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: eaa5f71eb8f6861cf0e57f1a0f52aeb020d9e18e
   React-jsinspector: 9885f6f94d231b95a739ef7bb50536fb87ce7539
   React-logger: 3f8ebad1be1bf3299d1ab6d7f971802d7395c7ef
-  react-native-admanager-mobile-ads: 43d94640902b883f0ba575246f915931fb3a833b
+  react-native-admanager-mobile-ads: 568f1b1bbbd04d9ea027c3399a526f3d9fa49890
   react-native-safe-area-context: b8979f5eda6ed5903d4dbc885be3846ea3daa753
   react-native-visibility-aware-view: 818c2971be5d74b9f47e7f269fa5850c7afe728c
   React-perflogger: 2d505bbe298e3b7bacdd9e542b15535be07220f6
@@ -709,4 +709,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: b90ba69a6928f74de27a335a2f3cca272dfd7d22
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.1
