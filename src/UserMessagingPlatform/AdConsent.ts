@@ -47,7 +47,7 @@ export const AdsConsent: AdsConsentInterface = {
   ): Promise<AdsConsentInfo> {
     if (!isObject(options)) {
       throw new Error(
-        "AdsConsent.requestInfoUpdate(*) 'options' expected an object value."
+        "AdsConsent.requestConsentInfoUpdate(*) 'options' expected an object value."
       );
     }
 
@@ -58,7 +58,7 @@ export const AdsConsent: AdsConsentInterface = {
       options.debugGeography !== AdsConsentDebugGeography.NOT_EEA
     ) {
       throw new Error(
-        "AdsConsent.requestInfoUpdate(*) 'options.debugGeography' expected one of AdsConsentDebugGeography.DISABLED, AdsConsentDebugGeography.EEA or AdsConsentDebugGeography.NOT_EEA."
+        "AdsConsent.requestConsentInfoUpdate(*) 'options.debugGeography' expected one of AdsConsentDebugGeography.DISABLED, AdsConsentDebugGeography.EEA or AdsConsentDebugGeography.NOT_EEA."
       );
     }
 
@@ -67,21 +67,21 @@ export const AdsConsent: AdsConsentInterface = {
       !isBoolean(options.tagForUnderAgeOfConsent)
     ) {
       throw new Error(
-        "AdsConsent.requestInfoUpdate(*) 'options.tagForUnderAgeOfConsent' expected a boolean value."
+        "AdsConsent.requestConsentInfoUpdate(*) 'options.tagForUnderAgeOfConsent' expected a boolean value."
       );
     }
 
     if (isPropertySet(options, "testDeviceIdentifiers")) {
       if (!isArray(options.testDeviceIdentifiers)) {
         throw new Error(
-          "AdsConsent.requestInfoUpdate(*) 'options.testDeviceIdentifiers' expected an array of string values."
+          "AdsConsent.requestConsentInfoUpdate(*) 'options.testDeviceIdentifiers' expected an array of string values."
         );
       }
 
       for (const deviceId of options.testDeviceIdentifiers ?? []) {
         if (!isString(deviceId)) {
           throw new Error(
-            "AdsConsent.requestInfoUpdate(*) 'options.testDeviceIdentifiers' expected an array of string values."
+            "AdsConsent.requestConsentInfoUpdate(*) 'options.testDeviceIdentifiers' expected an array of string values."
           );
         }
       }

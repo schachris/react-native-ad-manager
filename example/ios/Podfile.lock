@@ -938,7 +938,7 @@ PODS:
   - React-Mapbuffer (0.74.2):
     - glog
     - React-debug
-  - react-native-admanager-mobile-ads (0.2.1):
+  - react-native-admanager-mobile-ads (0.3.0):
     - DoubleConversion
     - glog
     - Google-Mobile-Ads-SDK (>= 11.5.0)
@@ -1458,7 +1458,7 @@ SPEC CHECKSUMS:
   React-jsitracing: 0fa7f78d8fdda794667cb2e6f19c874c1cf31d7e
   React-logger: 29fa3e048f5f67fe396bc08af7606426d9bd7b5d
   React-Mapbuffer: bf56147c9775491e53122a94c423ac201417e326
-  react-native-admanager-mobile-ads: 3f1dcf47272053d2b0ab5a0cd94c86b6dfd7a5c8
+  react-native-admanager-mobile-ads: 2d519452d631f7f9370c663eb1edd620e3789c96
   react-native-safe-area-context: 399a5859f6acbdf67f671c69b53113f535f3b5b0
   react-native-visibility-aware-view: 9cdc6e90b247ec50e441bc22571399b2f96b4204
   React-nativeconfig: 9f223cd321823afdecf59ed00861ab2d69ee0fc1
