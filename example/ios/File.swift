@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  AdmanagerMobileAdsExample
+//  AdManagerMobileAdsExample
 //
 
 import Foundation

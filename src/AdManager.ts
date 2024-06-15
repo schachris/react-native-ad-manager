@@ -6,7 +6,7 @@ import {
   findNodeHandle
 } from "react-native";
 
-import type { AdLoaderDetails, Spec } from "./NativeAdmanagerMobileAds";
+import type { AdLoaderDetails, Spec } from "./NativeAdManagerMobileAds";
 import type {
   AdTrackingTransparencyStatus,
   GADAdRequestOptions,
@@ -23,8 +23,8 @@ const LINKING_ERROR =
 const isTurboModuleEnabled = global.__turboModuleProxy != null;
 
 const AdManagerModule: Spec = isTurboModuleEnabled
-  ? require("./NativeAdmanagerMobileAds").default
-  : NativeModules.AdmanagerMobileAds;
+  ? require("./NativeAdManagerMobileAds").default
+  : NativeModules.AdManagerMobileAds;
 
 export const NativeAdManager: Spec = AdManagerModule
   ? AdManagerModule
@@ -33,13 +33,6 @@ export const NativeAdManager: Spec = AdManagerModule
         throw new Error(LINKING_ERROR);
       }
     });
-
-export async function multiply(a: number, b: number): Promise<number> {
-  if (Platform.OS === "android") {
-    return NativeAdManager.multiply(a, b);
-  }
-  return 0;
-}
 
 export type CustomAdClickHandler = (
   result: { assetKey: string } & AdLoaderDetails<any>

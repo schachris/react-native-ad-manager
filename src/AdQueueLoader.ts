@@ -1,7 +1,7 @@
 import { AdLoader } from "./AdLoader";
 import { Queue } from "./Queue";
+import { PackageConfig, logInfo } from "./log";
 import type { AdSpecification, GADAdRequestOptions } from "./types";
-import { PackageConfig, logInfo } from "./utils";
 
 function guidGenerator() {
   var S4 = function () {

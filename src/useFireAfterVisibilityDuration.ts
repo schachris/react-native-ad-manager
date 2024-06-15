@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-import { PackageConfig } from "./utils";
+import { PackageConfig } from "./log";
 
 function getTimeDifferenceSince(lastTimestamp: undefined | number) {
   if (lastTimestamp === undefined) {

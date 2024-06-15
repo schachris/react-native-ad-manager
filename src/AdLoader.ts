@@ -1,11 +1,12 @@
 import { AdManager } from "./AdManager";
-import type { AdLoaderDetails } from "./NativeAdmanagerMobileAds";
+import type { AdLoaderDetails } from "./NativeAdManagerMobileAds";
+import { PackageConfig, logInfo } from "./log";
 import {
   AdState,
   type AdSpecification,
   type GADAdRequestOptions
 } from "./types";
-import { PackageConfig, adStateToString, logInfo } from "./utils";
+import { adStateToString } from "./utils";
 
 export class AdLoader<
   AdFormatType,

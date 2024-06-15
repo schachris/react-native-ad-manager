@@ -2,7 +2,7 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:AdmanagerMobileAdsExample.xcodeproj">
+      location = "group:AdManagerMobileAdsExample.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:Pods/Pods.xcodeproj">

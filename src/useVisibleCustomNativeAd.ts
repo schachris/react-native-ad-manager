@@ -1,13 +1,14 @@
 import { useEffect } from "react";
 
 import type { AdQueueLoader } from "./AdQueueLoader";
+import { logInfo } from "./log";
 import { AdState } from "./types";
 import {
   CustomNativeAdHookReturnType,
   useCustomNativeAd
 } from "./useCustomNativeAd";
 import { useFireAfterVisibilityDuration } from "./useFireAfterVisibilityDuration";
-import { adStateToString, logInfo } from "./utils";
+import { adStateToString } from "./utils";
 
 export function useVisibleCustomNativeAd<AdFormatType, Targeting>({
   visible,

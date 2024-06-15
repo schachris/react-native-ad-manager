@@ -1,4 +1,4 @@
-import { AdState } from "./types";
+import { AdState } from "../types";
 
 export function adStateToString(state: AdState) {
   switch (state) {
@@ -25,24 +25,5 @@ export function adStateToString(state: AdState) {
 
     case AdState.Outdated:
       return "outdated";
-  }
-}
-
-export const PackageConfig = {
-  logging: false
-};
-
-export function logInfo(
-  shouldLog: boolean,
-  {
-    adUnitId,
-    formatIds,
-    identifier
-  }: { identifier?: string; adUnitId: string; formatIds: string[] },
-  name: string,
-  ...data: any[]
-) {
-  if (__DEV__ && shouldLog) {
-    console.log("AMAD: ", adUnitId, identifier || formatIds, name, ...data);
   }
 }

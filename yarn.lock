@@ -2007,6 +2007,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@iabtcf/core@npm:^1.5.6":
+  version: 1.5.6
+  resolution: "@iabtcf/core@npm:1.5.6"
+  checksum: 561626b626ee476dea5dd3a6ed0ebc26caac2475fc9509583f0e66c92ad67c3a2c2816b3516a4f043904b40607c9a4d44cbacbf09a5897740fd273e057c02c2c
+  languageName: node
+  linkType: hard
+
 "@iarna/toml@npm:2.2.5":
   version: 2.2.5
   resolution: "@iarna/toml@npm:2.2.5"
@@ -11048,6 +11055,7 @@ __metadata:
   dependencies:
     "@commitlint/config-conventional": ^17.0.2
     "@evilmartians/lefthook": ^1.5.0
+    "@iabtcf/core": ^1.5.6
     "@react-native/eslint-config": ^0.73.1
     "@release-it/conventional-changelog": ^5.0.0
     "@types/jest": ^29.5.5

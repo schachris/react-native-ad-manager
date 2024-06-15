@@ -21,10 +21,10 @@ import com.google.android.gms.ads.nativead.NativeCustomFormatAd;
 import java.util.List;
 import java.util.Set;
 
-public class AdmanagerMobileAdsModule extends AdmanagerMobileAdsSpec {
-  public static final String NAME = "AdmanagerMobileAds";
+public class AdManagerMobileAdsModule extends AdManagerMobileAdsSpec {
+  public static final String NAME = "AdManagerMobileAds";
 
-  AdmanagerMobileAdsModule(ReactApplicationContext context) {
+  AdManagerMobileAdsModule(ReactApplicationContext context) {
     super(context);
     this._defaultTargeting = null;
   }
@@ -38,10 +38,10 @@ public class AdmanagerMobileAdsModule extends AdmanagerMobileAdsSpec {
 
   // Example method
   // See https://reactnative.dev/docs/native-modules-android
-  @ReactMethod
-  public void multiply(double a, double b, Promise promise) {
-    promise.resolve(a * b);
-  }
+  // @ReactMethod
+  // public void multiply(double a, double b, Promise promise) {
+  //   promise.resolve(a * b);
+  // }
 
 
   private ReadableMap _defaultTargeting;

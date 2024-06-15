@@ -1,6 +1,6 @@
 {
   "name": "react-native-admanager-mobile-ads",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "A wrapper around Google Ad Manager - Mobile Ads SDK for extreme flexibility",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -214,8 +214,11 @@
     ]
   },
   "codegenConfig": {
-    "name": "RNAdmanagerMobileAdsSpec",
+    "name": "RNAdManagerMobileAdsSpec",
     "type": "modules",
     "jsSrcsDir": "src"
+  },
+  "dependencies": {
+    "@iabtcf/core": "^1.5.6"
   }
 }
