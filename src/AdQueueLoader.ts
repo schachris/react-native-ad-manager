@@ -1,18 +1,19 @@
-import { AdLoader } from './AdLoader';
-import { Queue } from './Queue';
-import type { AdSpecification, GADAdRequestOptions } from './types';
-import { PackageConfig, logInfo } from './utils';
+import { AdLoader } from "./AdLoader";
+import { Queue } from "./Queue";
+import type { AdSpecification, GADAdRequestOptions } from "./types";
+import { PackageConfig, logInfo } from "./utils";
 
 function guidGenerator() {
   var S4 = function () {
     return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
   };
-  return S4() + S4() + '-' + S4() + '-' + S4() + S4() + S4();
+  return S4() + S4() + "-" + S4() + "-" + S4() + S4() + S4();
 }
 
-export class AdQueueLoader<AdFormatType, AdTargetingOptions = Record<string, string>> extends Queue<
-  AdLoader<AdFormatType, AdTargetingOptions>
-> {
+export class AdQueueLoader<
+  AdFormatType,
+  AdTargetingOptions = Record<string, string>
+> extends Queue<AdLoader<AdFormatType, AdTargetingOptions>> {
   private minNumberOfItems: number = 0;
   private specification: AdSpecification;
 
@@ -30,8 +31,10 @@ export class AdQueueLoader<AdFormatType, AdTargetingOptions = Record<string, str
     this.setOptions(requestOptions);
   }
 
-  public setOptions(options: GADAdRequestOptions<AdTargetingOptions> | undefined) {
-    logInfo(PackageConfig.logging, this.specification, 'setOptions', options);
+  public setOptions(
+    options: GADAdRequestOptions<AdTargetingOptions> | undefined
+  ) {
+    logInfo(PackageConfig.logging, this.specification, "setOptions", options);
     this.requestOptions = options;
     this.clear();
   }
@@ -56,7 +59,12 @@ export class AdQueueLoader<AdFormatType, AdTargetingOptions = Record<string, str
 
   private refillQueue() {
     const missing = this.minNumberOfItems - this.size();
-    logInfo(PackageConfig.logging, this.specification, 'refill', `missing: ${missing}`);
+    logInfo(
+      PackageConfig.logging,
+      this.specification,
+      "refill",
+      `missing: ${missing}`
+    );
 
     for (let index = 0; index < missing; index++) {
       const ad = new AdLoader<AdFormatType, AdTargetingOptions>(

@@ -15,6 +15,7 @@
         android:name="com.google.android.gms.ads.APPLICATION_ID"
         android:value="ca-app-pub-9945908553848709~2148721779"/>
 
+
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"

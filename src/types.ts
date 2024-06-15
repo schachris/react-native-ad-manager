@@ -1,8 +1,8 @@
-import type { Double } from 'react-native/Libraries/Types/CodegenTypes';
+import type { Double } from "react-native/Libraries/Types/CodegenTypes";
 
 export enum GADAdapterStatusState {
   NotReady = 0,
-  Ready = 1,
+  Ready = 1
 }
 
 export type AdErrorProps = { title: string; code: string; message: string };
@@ -16,7 +16,7 @@ export enum AdTrackingTransparencyStatus {
   NotDetermined = 0,
   Restricted = 1,
   Denied = 2,
-  Authorized = 3,
+  Authorized = 3
 }
 
 export type GADAdRequestOptions<T = Record<string, string>> = {
@@ -85,5 +85,5 @@ export enum AdState {
   Displaying = 3,
   Impression = 4,
   Clicked = 5,
-  Outdated = 6,
+  Outdated = 6
 }

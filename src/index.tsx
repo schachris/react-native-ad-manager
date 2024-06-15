@@ -1,10 +1,10 @@
-export { useCustomNativeAd, CustomNativeAdHookReturnType } from './useCustomNativeAd';
-export { useVisibleCustomNativeAd } from './useVisibleCustomNativeAd';
+export * from "./useCustomNativeAd";
+export { useVisibleCustomNativeAd } from "./useVisibleCustomNativeAd";
 
-export { AdQueueLoader } from './AdQueueLoader';
+export { AdQueueLoader } from "./AdQueueLoader";
 
-export { AdManager, CustomAdClickHandler } from './AdManager';
-export { AdDetails, AdLoaderDetails } from './NativeAdManager';
+export * from "./AdManager";
+export * from "./NativeAdmanagerMobileAds";
 
-export * from './types';
-export * from './utils';
+export * from "./types";
+export * from "./utils";

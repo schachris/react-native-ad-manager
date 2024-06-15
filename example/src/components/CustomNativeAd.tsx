@@ -1,14 +1,21 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState } from "react";
 
-import { type StyleProp, Text, type ViewStyle } from 'react-native';
+import { Text, type StyleProp, type ViewStyle } from "react-native";
 
-import { CustomNativeAdHookReturnType, useVisibleCustomNativeAd } from 'react-native-admanager-mobile-ads';
-import { VisibilityAwareView } from 'react-native-visibility-aware-view';
+import {
+  CustomNativeAdHookReturnType,
+  useVisibleCustomNativeAd
+} from "react-native-admanager-mobile-ads";
+import { VisibilityAwareView } from "react-native-visibility-aware-view";
 
-import type { AdQueueLoader } from '../../../src/AdQueueLoader';
+import type { AdQueueLoader } from "../../../src/AdQueueLoader";
 
 export type CustomNativeAdProps<AdFormatType, Targeting> = {
-  children?: (props: CustomNativeAdHookReturnType<AdFormatType, Targeting> & { visible: boolean }) => React.ReactNode;
+  children?: (
+    props: CustomNativeAdHookReturnType<AdFormatType, Targeting> & {
+      visible: boolean;
+    }
+  ) => React.ReactNode;
   style?: StyleProp<ViewStyle>;
 
   adLoader: AdQueueLoader<AdFormatType, Targeting>;
@@ -18,14 +25,16 @@ export type CustomNativeAdProps<AdFormatType, Targeting> = {
   identifier?: string;
 };
 
-export function CustomNativeAd<AdFormatType, Targeting>(props: CustomNativeAdProps<AdFormatType, Targeting>) {
+export function CustomNativeAd<AdFormatType, Targeting>(
+  props: CustomNativeAdProps<AdFormatType, Targeting>
+) {
   const {
     children,
     adLoader,
     style,
     msToDisplayTillImpressionRecording = 2000,
     msToDisplayTillRenew = 30 * 1000,
-    identifier,
+    identifier
   } = props;
 
   const [visible, setVisibility] = useState<boolean>(false);
@@ -42,7 +51,7 @@ export function CustomNativeAd<AdFormatType, Targeting>(props: CustomNativeAdPro
     msToDisplayTillImpressionRecording,
     adLoader,
     log: !!identifier,
-    identifier,
+    identifier
   });
 
   return (

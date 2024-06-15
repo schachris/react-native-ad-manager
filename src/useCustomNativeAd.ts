@@ -1,15 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { AdLoader } from './AdLoader';
-import type { AdQueueLoader } from './AdQueueLoader';
-import type { AdDetails } from './NativeAdManager';
-import { AdState } from './types';
-import { PackageConfig, adStateToString, logInfo } from './utils';
-
-export type AdSpecification = {
-  adUnitId: string;
-  formatIds: string[];
-};
+import { AdLoader } from "./AdLoader";
+import { AdQueueLoader } from "./AdQueueLoader";
+import { AdDetails } from "./NativeAdmanagerMobileAds";
+import { AdState, type AdSpecification } from "./types";
+import { PackageConfig, adStateToString, logInfo } from "./utils";
 
 export type AdLoading = {
   specification: AdSpecification;
@@ -21,7 +16,10 @@ export type AdError = {
   error?: Error;
 };
 
-export type AdDisplaying<AdFormatType> = { ad: AdDetails<AdFormatType>; state: AdState.Displaying };
+export type AdDisplaying<AdFormatType> = {
+  ad: AdDetails<AdFormatType>;
+  state: AdState.Displaying;
+};
 
 export type AdReceived<AdFormatType> = {
   ad: AdDetails<AdFormatType>;
@@ -64,24 +62,24 @@ function getAdState<AdFormatType, Targeting>(
     if (state === AdState.Init) {
       return {
         specification: ad.getSpecification(),
-        state: AdState.Loading,
+        state: AdState.Loading
       };
     } else if (state === AdState.Loading) {
       return {
         specification: ad.getSpecification(),
-        state: AdState.Loading,
+        state: AdState.Loading
       };
     } else if (state >= AdState.Received) {
       return {
         ad: ad.getInfos()!.ad!,
         targeting: ad.getTargeting(),
-        state,
+        state
       } as AdStates<AdFormatType, Targeting>;
     }
   }
   return {
     error: ad?.getError(),
-    state: AdState.Error,
+    state: AdState.Error
   };
 }
 
@@ -97,10 +95,10 @@ function getOne<AdFormatType, Targeting>(config: {
     PackageConfig.logging,
     {
       ...specification,
-      identifier: instanceId,
+      identifier: instanceId
     },
-    'getOne',
-    possibleAd ? adStateToString(possibleAd.getState()) : 'create adloader'
+    "getOne",
+    possibleAd ? adStateToString(possibleAd.getState()) : "create adloader"
   );
 
   if (possibleAd) {
@@ -110,7 +108,7 @@ function getOne<AdFormatType, Targeting>(config: {
   return new AdLoader<AdFormatType, Targeting>(
     {
       adUnitId,
-      formatIds,
+      formatIds
     },
     options,
     instanceId
@@ -125,17 +123,30 @@ export function useCustomNativeAd<AdFormatType, Targeting>(
     identifier?: string;
   }
 ) {
-  const { renew_attempts = 2, log = false, identifier = 'useCustomNativeAd' } = options || {};
-  const tracker = useRef<{ renew_counter: number; renew_afterError: number; impressions: number }>({
+  const {
+    renew_attempts = 2,
+    log = false,
+    identifier = "useCustomNativeAd"
+  } = options || {};
+  const tracker = useRef<{
+    renew_counter: number;
+    renew_afterError: number;
+    impressions: number;
+  }>({
     renew_counter: 0,
     renew_afterError: 0,
-    impressions: 0,
+    impressions: 0
   });
   const ref = useRef<AdLoader<AdFormatType, Targeting>>();
   if (!ref.current) {
-    ref.current = getOne<AdFormatType, Targeting>({ loader: queue, instanceId: identifier });
+    ref.current = getOne<AdFormatType, Targeting>({
+      loader: queue,
+      instanceId: identifier
+    });
   }
-  const [state, setState] = useState<AdStates<AdFormatType, Targeting>>(getAdState(ref.current));
+  const [state, setState] = useState<AdStates<AdFormatType, Targeting>>(
+    getAdState(ref.current)
+  );
   useEffect(() => {
     if (ref.current) {
       ref.current.onStateChangeHandler = () => {
@@ -158,12 +169,12 @@ export function useCustomNativeAd<AdFormatType, Targeting>(
       log,
       {
         ...queue.getSpecification(),
-        identifier,
+        identifier
       },
-      'renew action',
-      'tracker:',
+      "renew action",
+      "tracker:",
       tracker.current,
-      'upcoming:',
+      "upcoming:",
       upcomingAdRef.current
     );
 
@@ -176,9 +187,9 @@ export function useCustomNativeAd<AdFormatType, Targeting>(
         log,
         {
           ...queue.getSpecification(),
-          identifier,
+          identifier
         },
-        'get new adstate',
+        "get new adstate",
         newAdState
       );
       if (newAdState === AdState.Init || newAdState === AdState.Loading) {
@@ -188,9 +199,9 @@ export function useCustomNativeAd<AdFormatType, Targeting>(
             log,
             {
               ...queue.getSpecification(),
-              identifier,
+              identifier
             },
-            'legacy upcoming onStateChangeHandler',
+            "legacy upcoming onStateChangeHandler",
             adStateToString(newState)
           );
           if (upcomingAdRef.current) {
@@ -210,7 +221,8 @@ export function useCustomNativeAd<AdFormatType, Targeting>(
                 ref.current = undefined;
               }
               ref.current = upcomingAdRef.current;
-              ref.current.onStateChangeHandler = () => setState(getAdState(ref.current));
+              ref.current.onStateChangeHandler = () =>
+                setState(getAdState(ref.current));
               upcomingAdRef.current = undefined;
               setState(getAdState(ref.current));
             }
@@ -232,9 +244,9 @@ export function useCustomNativeAd<AdFormatType, Targeting>(
             log,
             {
               ...queue.getSpecification(),
-              identifier,
+              identifier
             },
-            'call renew error'
+            "call renew error"
           );
           renew();
         }
@@ -244,9 +256,9 @@ export function useCustomNativeAd<AdFormatType, Targeting>(
         log,
         {
           ...queue.getSpecification(),
-          identifier,
+          identifier
         },
-        'blocked...something running already'
+        "blocked...something running already"
       );
     }
   }, [queue, log, renew_attempts, identifier]);
@@ -279,7 +291,7 @@ export function useCustomNativeAd<AdFormatType, Targeting>(
     impression,
     click,
     renew,
-    tracker: tracker.current,
+    tracker: tracker.current
   } as CustomNativeAdHookReturnType<AdFormatType, Targeting>;
 }
 

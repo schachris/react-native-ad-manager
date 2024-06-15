@@ -1,9 +1,9 @@
 
 #import <React/RCTEventEmitter.h>
 #ifdef RCT_NEW_ARCH_ENABLED
-#import "RNAdManagerSpec.h"
+#import "RNAdmanagerMobileAdsSpec.h"
 
-@interface AdManager : RCTEventEmitter <NativeAdManagerSpec>
+@interface AdManager : RCTEventEmitter <NativeAdmanagerMobileAdsSpec>
 #else
 #import <React/RCTBridgeModule.h>
 

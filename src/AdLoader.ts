@@ -1,9 +1,16 @@
-import { AdManager } from './AdManager';
-import type { AdLoaderDetails } from './NativeAdManager';
-import { AdSpecification, AdState, GADAdRequestOptions } from './types';
-import { PackageConfig, adStateToString, logInfo } from './utils';
+import { AdManager } from "./AdManager";
+import type { AdLoaderDetails } from "./NativeAdmanagerMobileAds";
+import {
+  AdState,
+  type AdSpecification,
+  type GADAdRequestOptions
+} from "./types";
+import { PackageConfig, adStateToString, logInfo } from "./utils";
 
-export class AdLoader<AdFormatType, AdTargetingOptions = Record<string, string>> {
+export class AdLoader<
+  AdFormatType,
+  AdTargetingOptions = Record<string, string>
+> {
   private specification: AdSpecification;
 
   private state: AdState = AdState.Init;
@@ -14,7 +21,10 @@ export class AdLoader<AdFormatType, AdTargetingOptions = Record<string, string>>
   private error?: Error;
   private requestOptions: GADAdRequestOptions<AdTargetingOptions> | undefined;
 
-  public errorHandler?: (loader: AdLoader<AdFormatType, AdTargetingOptions>, error: Error) => void;
+  public errorHandler?: (
+    loader: AdLoader<AdFormatType, AdTargetingOptions>,
+    error: Error
+  ) => void;
 
   constructor(
     options: AdSpecification,
@@ -33,15 +43,20 @@ export class AdLoader<AdFormatType, AdTargetingOptions = Record<string, string>>
 
   private async load() {
     try {
-      const details = await AdManager.createAdLoader<AdFormatType>(this.specification);
+      const details = await AdManager.createAdLoader<AdFormatType>(
+        this.specification
+      );
       this.id = details.id;
       this.adLoaderInfos = details;
       this.updateState(AdState.Loading);
 
-      const { targeting, ...load_details } = await AdManager.loadRequest<AdFormatType, AdTargetingOptions>(
+      const { targeting, ...load_details } = await AdManager.loadRequest<
+        AdFormatType,
+        AdTargetingOptions
+      >(
         details.id,
         this.requestOptions || {
-          targeting: undefined,
+          targeting: undefined
         }
       );
 
@@ -114,7 +129,10 @@ export class AdLoader<AdFormatType, AdTargetingOptions = Record<string, string>>
     try {
       let infos;
       if (assetKey) {
-        infos = await AdManager.recordClickOnAssetKey<AdFormatType>(this.getRequestId()!, assetKey);
+        infos = await AdManager.recordClickOnAssetKey<AdFormatType>(
+          this.getRequestId()!,
+          assetKey
+        );
       } else {
         infos = await AdManager.recordClick<AdFormatType>(this.getRequestId()!);
       }
@@ -166,7 +184,7 @@ export class AdLoader<AdFormatType, AdTargetingOptions = Record<string, string>>
       PackageConfig.logging,
       {
         ...this.specification,
-        identifier: this.id,
+        identifier: this.id
       },
       name,
       ...props
