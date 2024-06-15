@@ -27,7 +27,7 @@ export interface AdsConsentInterface {
    * ```js
    * import { AdsConsent } from 'react-native-google-mobile-ads';
    *
-   * const consentInfo = await AdsConsent.requestInfoUpdate();
+   * const consentInfo = await AdsConsent.requestConsentInfoUpdate();
    * console.log('A consent form is available:', consentInfo.isConsentFormAvailable);
    * console.log('User consent status:', consentInfo.status);
    * ```
@@ -46,7 +46,7 @@ export interface AdsConsentInterface {
    * import { AdsConsent, AdsConsentStatus } from 'react-native-google-mobile-ads';
    *
    * async function requestConsent() {
-   *   const consentInfo = await AdsConsent.requestInfoUpdate();
+   *   const consentInfo = await AdsConsent.requestConsentInfoUpdate();
    *
    *   // Check if user requires consent
    *   if (
@@ -133,7 +133,7 @@ export interface AdsConsentInterface {
    * ```js
    * import { AdsConsent } from '@invertase/react-native-google-ads';
    *
-   * await AdsConsent.requestInfoUpdate();
+   * await AdsConsent.requestConsentInfoUpdate();
    * const gdprApplies = await AdsConsent.getGdprApplies();
    * ```
    */
@@ -152,7 +152,7 @@ export interface AdsConsentInterface {
    * ```js
    * import { AdsConsent } from '@invertase/react-native-google-ads';
    *
-   * await AdsConsent.requestInfoUpdate();
+   * await AdsConsent.requestConsentInfoUpdate();
    * const purposeConsents = await AdsConsent.getPurposeConsents();
    * const hasConsentForPurposeOne = purposeConsents.startsWith("1");
    * ```

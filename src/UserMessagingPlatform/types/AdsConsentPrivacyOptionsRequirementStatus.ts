@@ -20,7 +20,7 @@
  */
 export enum AdsConsentPrivacyOptionsRequirementStatus {
   /**
-   * Unknown consent status, AdsConsent.requestInfoUpdate needs to be called to update it.
+   * Unknown consent status, AdsConsent.requestConsentInfoUpdate needs to be called to update it.
    */
   UNKNOWN = "UNKNOWN",
 
