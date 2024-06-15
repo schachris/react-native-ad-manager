@@ -1,16 +1,9 @@
 import * as React from "react";
 
-import {
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
-} from "react-native";
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useNavigation } from "@react-navigation/native";
-import { multiply } from "react-native-admanager-mobile-ads";
+import { ListItem } from "../components/ListItem";
 
 const styles = StyleSheet.create({
   container: {
@@ -18,28 +11,6 @@ const styles = StyleSheet.create({
     backgroundColor: "lightgray"
   }
 });
-
-function ListItem({ title, onPress }: { title: string; onPress: () => void }) {
-  multiply(1, 2);
-  return (
-    <TouchableOpacity onPress={onPress} style={{ marginVertical: 4 }}>
-      <View
-        style={{
-          backgroundColor: "white",
-          paddingHorizontal: 16,
-          paddingVertical: 6,
-          minHeight: 44,
-          justifyContent: "space-between",
-          flexDirection: "row",
-          alignItems: "center"
-        }}
-      >
-        <Text style={{ fontSize: 20, fontWeight: "bold" }}>{title}</Text>
-        <Text>{">"}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-}
 
 // @ts-ignore
 const uiManager = global?.nativeFabricUIManager ? "Fabric" : "Paper";
@@ -63,6 +34,10 @@ export function HomeScreen() {
         <ListItem
           title="Manager Screen"
           onPress={() => navigation.navigate("ManagerScreen")}
+        />
+        <ListItem
+          title="AdConsent Screen"
+          onPress={() => navigation.navigate("AdConsentScreen")}
         />
       </ScrollView>
     </View>

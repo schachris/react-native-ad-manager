@@ -217,5 +217,8 @@
     "name": "RNAdmanagerMobileAdsSpec",
     "type": "modules",
     "jsSrcsDir": "src"
+  },
+  "dependencies": {
+    "@iabtcf/core": "^1.5.6"
   }
 }

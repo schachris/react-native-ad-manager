@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { PackageConfig } from "react-native-admanager-mobile-ads";
 
+import { AdConsentScreen } from "./screens/AdConsentScreen";
 import { AdScreen } from "./screens/AdScreen";
 import { AdsScreen } from "./screens/AdsScreen";
 import { HomeScreen } from "./screens/HomeScreen";
@@ -21,6 +22,10 @@ export default function RootApp() {
         <ManagerStack.Screen name="AdScreen" component={AdScreen} />
         <ManagerStack.Screen name="AdsScreen" component={AdsScreen} />
         <ManagerStack.Screen name="ManagerScreen" component={ManagerScreen} />
+        <ManagerStack.Screen
+          name="AdConsentScreen"
+          component={AdConsentScreen}
+        />
       </ManagerStack.Navigator>
     </NavigationContainer>
   );

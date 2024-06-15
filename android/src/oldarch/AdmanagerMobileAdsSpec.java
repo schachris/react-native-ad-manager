@@ -12,7 +12,7 @@ abstract class AdmanagerMobileAdsSpec extends ReactContextBaseJavaModule {
     super(context);
   }
 
-  public abstract void multiply(double a, double b, Promise promise);
+  // public abstract void multiply(double a, double b, Promise promise);
 
   public abstract void start();
   public abstract void clearAll();

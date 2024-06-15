@@ -34,13 +34,6 @@ export const NativeAdManager: Spec = AdManagerModule
       }
     });
 
-export async function multiply(a: number, b: number): Promise<number> {
-  if (Platform.OS === "android") {
-    return NativeAdManager.multiply(a, b);
-  }
-  return 0;
-}
-
 export type CustomAdClickHandler = (
   result: { assetKey: string } & AdLoaderDetails<any>
 ) => void;

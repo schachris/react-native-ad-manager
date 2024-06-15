@@ -38,10 +38,10 @@ public class AdmanagerMobileAdsModule extends AdmanagerMobileAdsSpec {
 
   // Example method
   // See https://reactnative.dev/docs/native-modules-android
-  @ReactMethod
-  public void multiply(double a, double b, Promise promise) {
-    promise.resolve(a * b);
-  }
+  // @ReactMethod
+  // public void multiply(double a, double b, Promise promise) {
+  //   promise.resolve(a * b);
+  // }
 
 
   private ReadableMap _defaultTargeting;

@@ -106,8 +106,6 @@ export interface Spec extends TurboModule {
   // event emitter
   addListener: (eventName: string) => void;
   removeListeners: (count: number) => void;
-
-  multiply(a: number, b: number): Promise<number>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>("AdmanagerMobileAds");
