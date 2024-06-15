@@ -17,8 +17,8 @@
 
 RCT_EXPORT_MODULE()
 
-// Example method
-// See // https://reactnative.dev/docs/native-modules-ios
+//// Example method
+//// See // https://reactnative.dev/docs/native-modules-ios
 //RCT_REMAP_METHOD(multiply,
 //                 multiplyWithA:(double)a withB:(double)b
 //                 withResolver:(RCTPromiseResolveBlock)resolve
@@ -28,13 +28,21 @@ RCT_EXPORT_MODULE()
 //
 //    resolve(result);
 //}
+//
+//- (void)multiply:(double)a b:(double)b resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+//    NSNumber *result = @(a * b);
+//
+//    resolve(result);
+//}
+
+
 
 // Don't compile this code when we build for the old architecture.
 #ifdef RCT_NEW_ARCH_ENABLED
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
 (const facebook::react::ObjCTurboModule::InitParams &)params
 {
-    return std::make_shared<facebook::react::NativeAdManagerSpecJSI>(params);
+    return std::make_shared<facebook::react::NativeAdmanagerMobileAdsSpecJSI>(params);
 }
 #endif
 
@@ -381,10 +389,10 @@ RCT_REMAP_METHOD(recordClick,
     }];
 }
 
-- (void)createAdLoader:(JS::NativeAdManager::SpecCreateAdLoaderOptions &)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+- (void)createAdLoader:(JS::NativeAdmanagerMobileAds::SpecCreateAdLoaderOptions &)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
     
-    std::optional<JS::NativeAdManager::SpecCreateAdLoaderOptionsVideoConfig> videoConfig = options.videoConfig();
-    std::optional<JS::NativeAdManager::SpecCreateAdLoaderOptionsImageConfig> imageConfig = options.imageConfig();
+    std::optional<JS::NativeAdmanagerMobileAds::SpecCreateAdLoaderOptionsVideoConfig> videoConfig = options.videoConfig();
+    std::optional<JS::NativeAdmanagerMobileAds::SpecCreateAdLoaderOptionsImageConfig> imageConfig = options.imageConfig();
 
     
     GADNativeAdImageAdLoaderOptions *imageOptions = [[GADNativeAdImageAdLoaderOptions alloc] init];
@@ -396,7 +404,7 @@ RCT_REMAP_METHOD(recordClick,
         }
         
         if (imageConfig.value().shouldRequestMultipleImages().has_value()) {
-            imageConfig.shouldRequestMultipleImages = imageConfig.value().shouldRequestMultipleImages().value();
+            imageConfig->shouldRequestMultipleImages() = imageConfig.value().shouldRequestMultipleImages().value();
         }
     }else{
         imageOptions.disableImageLoading = NO;
@@ -640,6 +648,8 @@ RCT_REMAP_METHOD(recordClick,
 - (void)addListener:(NSString *)eventName {
 //    [super addListener:eventName];
 }
+
+
 
 
 @end

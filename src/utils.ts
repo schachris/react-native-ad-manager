@@ -1,44 +1,48 @@
-import { AdState } from './types';
+import { AdState } from "./types";
 
 export function adStateToString(state: AdState) {
   switch (state) {
     case AdState.Error:
-      return 'error';
+      return "error";
 
     case AdState.Init:
-      return 'init';
+      return "init";
 
     case AdState.Loading:
-      return 'loading';
+      return "loading";
 
     case AdState.Received:
-      return 'received';
+      return "received";
 
     case AdState.Displaying:
-      return 'displaying';
+      return "displaying";
 
     case AdState.Impression:
-      return 'impression';
+      return "impression";
 
     case AdState.Clicked:
-      return 'clicked';
+      return "clicked";
 
     case AdState.Outdated:
-      return 'outdated';
+      return "outdated";
   }
 }
 
 export const PackageConfig = {
-  logging: false,
+  logging: false
 };
 
 export function logInfo(
   shouldLog: boolean,
-  { adUnitId, formatIds, identifier }: { identifier?: string; adUnitId: string; formatIds: string[] },
+  {
+    adUnitId,
+    formatIds,
+    identifier
+  }: { identifier?: string; adUnitId: string; formatIds: string[] },
   name: string,
   ...data: any[]
 ) {
   if (__DEV__ && shouldLog) {
-    console.log('AMAD: ', adUnitId, identifier || formatIds, name, ...data);
+    console.log("AMAD: ", adUnitId, identifier || formatIds, name, ...data);
   }
 }

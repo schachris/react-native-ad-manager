@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 
 import {
   ActivityIndicator,
@@ -10,30 +10,30 @@ import {
   Switch,
   Text,
   TextInput,
-  View,
-} from 'react-native';
+  View
+} from "react-native";
 
-import { AdManager } from 'react-native-admanager-mobile-ads';
+import { AdManager } from "react-native-admanager-mobile-ads";
 
-import { LogBox } from '../components/LogBox';
-import { Section } from '../components/Section';
+import { LogBox } from "../components/LogBox";
+import { Section } from "../components/Section";
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white"
   },
   box: {
     width: 60,
     height: 60,
-    marginVertical: 20,
+    marginVertical: 20
   },
   textField: {
     padding: 8,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: "#f9f9f9",
     fontSize: 15,
     margin: 8,
-    borderRadius: 8,
+    borderRadius: 8
   },
   keyboardPlaceholder: { height: 400 },
   logBox: {
@@ -41,32 +41,38 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     borderWidth: 2,
     borderRadius: 6,
-    borderColor: 'gray',
-    minHeight: 60,
+    borderColor: "gray",
+    minHeight: 60
   },
   logBoxTitle: {
     marginHorizontal: 12,
-    position: 'absolute',
-    alignSelf: 'center',
-    backgroundColor: 'white',
+    position: "absolute",
+    alignSelf: "center",
+    backgroundColor: "white",
     borderRadius: 6,
     padding: 3,
-    color: '#919191',
+    color: "#919191"
   },
   text: {
-    color: 'black',
-  },
+    color: "black"
+  }
 });
 
-AdManager.setTestDeviceIds(['04bcd6e03ee509b9a05da233c7aaaa67', '35E1B7A3E2AF29464C3E3B5F21E8FC7B']);
+AdManager.setTestDeviceIds([
+  "04bcd6e03ee509b9a05da233c7aaaa67",
+  "35E1B7A3E2AF29464C3E3B5F21E8FC7B"
+]);
 
 export function ManagerScreen() {
-  const [isLoadingAds, setIsLoading] = React.useState<{ [loaderId: string]: boolean | string }>({});
+  const [isLoadingAds, setIsLoading] = React.useState<{
+    [loaderId: string]: boolean | string;
+  }>({});
   const [log, setLog] = React.useState<any[]>([]);
-  const addLog = (...addedLogs: any[]) => setLog((logs) => [...logs, '\n', ...addedLogs]);
+  const addLog = (...addedLogs: any[]) =>
+    setLog((logs) => [...logs, "\n", ...addedLogs]);
 
-  const [loaderId, setLoaderId] = React.useState<string>('');
-  const [assetKey, setAssetKey] = React.useState<string>('');
+  const [loaderId, setLoaderId] = React.useState<string>("");
+  const [assetKey, setAssetKey] = React.useState<string>("");
 
   const [useATT, setUseATT] = React.useState(false);
 
@@ -133,7 +139,7 @@ export function ManagerScreen() {
           <TextInput
             onChangeText={setLoaderId}
             value={loaderId}
-            placeholder={'adLoaderId'}
+            placeholder={"adLoaderId"}
             clearButtonMode="while-editing"
             style={styles.textField}
           />
@@ -155,15 +161,15 @@ export function ManagerScreen() {
             title="createAdLoader"
             onPress={async () => {
               try {
-                const adUnitId = '/22248153318/test_native_ad';
+                const adUnitId = "/22248153318/test_native_ad";
                 // const formatIds = ['1111111'];
-                const formatIds = ['12008639'];
+                const formatIds = ["12008639"];
                 const details = await AdManager.createAdLoader({
                   adUnitId,
-                  formatIds,
+                  formatIds
                 });
 
-                setLoaderId((lId) => (lId === '' ? details.id : lId));
+                setLoaderId((lId) => (lId === "" ? details.id : lId));
                 addLog(`AdLoader:`, details);
               } catch (e) {
                 addLog(`Error:`, (e as Error).message);
@@ -173,12 +179,18 @@ export function ManagerScreen() {
         </Section>
 
         <Section>
-          <ActivityIndicator animating={isLoadingAds[loaderId] === 'request'} color="blue" />
+          <ActivityIndicator
+            animating={isLoadingAds[loaderId] === "request"}
+            color="blue"
+          />
           <Button
             title="loadRequest"
             onPress={async () => {
               try {
-                setIsLoading((loadings) => ({ ...loadings, [loaderId]: 'request' }));
+                setIsLoading((loadings) => ({
+                  ...loadings,
+                  [loaderId]: "request"
+                }));
                 const details = await AdManager.loadRequest(loaderId, {});
                 addLog(`loadRequest:`, details);
               } catch (e) {
@@ -191,11 +203,14 @@ export function ManagerScreen() {
             title="loadRequest with targeting"
             onPress={async () => {
               try {
-                setIsLoading((loadings) => ({ ...loadings, [loaderId]: 'request' }));
+                setIsLoading((loadings) => ({
+                  ...loadings,
+                  [loaderId]: "request"
+                }));
                 const details = await AdManager.loadRequest(loaderId, {
                   targeting: {
-                    test: 'hi',
-                  },
+                    test: "hi"
+                  }
                 });
                 addLog(`loadRequest with targeting:`, details);
               } catch (e) {
@@ -206,12 +221,18 @@ export function ManagerScreen() {
           />
         </Section>
         <Section>
-          <ActivityIndicator animating={isLoadingAds[loaderId] === 'impression'} color="blue" />
+          <ActivityIndicator
+            animating={isLoadingAds[loaderId] === "impression"}
+            color="blue"
+          />
           <Button
             title="recordImpression"
             onPress={async () => {
               try {
-                setIsLoading((loadings) => ({ ...loadings, [loaderId]: 'impression' }));
+                setIsLoading((loadings) => ({
+                  ...loadings,
+                  [loaderId]: "impression"
+                }));
                 const result = await AdManager.recordImpression(loaderId);
                 addLog(`recordImpression:`, result);
               } catch (e) {
@@ -222,13 +243,20 @@ export function ManagerScreen() {
           />
         </Section>
         <Section>
-          <ActivityIndicator animating={isLoadingAds[loaderId] === 'displaying'} color="blue" />
+          <ActivityIndicator
+            animating={isLoadingAds[loaderId] === "displaying"}
+            color="blue"
+          />
           <Button
             title="setIsDisplayingForLoader"
             onPress={async () => {
               try {
-                setIsLoading((loadings) => ({ ...loadings, [loaderId]: 'displaying' }));
-                const result = await AdManager.setIsDisplayingForLoader(loaderId);
+                setIsLoading((loadings) => ({
+                  ...loadings,
+                  [loaderId]: "displaying"
+                }));
+                const result =
+                  await AdManager.setIsDisplayingForLoader(loaderId);
                 addLog(`setIsDisplayingForLoader:`, result);
               } catch (e) {
                 addLog(`Error:`, (e as Error).message);
@@ -236,29 +264,48 @@ export function ManagerScreen() {
               setIsLoading((loadings) => ({ ...loadings, [loaderId]: false }));
             }}
           />
-          <View collapsable={false} style={{ backgroundColor: 'red', padding: 2 }} ref={myAdRef}>
+          <View
+            collapsable={false}
+            style={{ backgroundColor: "red", padding: 2 }}
+            ref={myAdRef}
+          >
             <Button
               title="setIsDisplayingOnViewForLoader"
               onPress={async () => {
                 try {
-                  setIsLoading((loadings) => ({ ...loadings, [loaderId]: 'displaying' }));
-                  const result = await AdManager.setIsDisplayingOnViewForLoader(loaderId, myAdRef);
+                  setIsLoading((loadings) => ({
+                    ...loadings,
+                    [loaderId]: "displaying"
+                  }));
+                  const result = await AdManager.setIsDisplayingOnViewForLoader(
+                    loaderId,
+                    myAdRef
+                  );
                   addLog(`setIsDisplayingOnViewForLoader:`, result);
                 } catch (e) {
                   addLog(`Error:`, (e as Error).message);
                 }
-                setIsLoading((loadings) => ({ ...loadings, [loaderId]: false }));
+                setIsLoading((loadings) => ({
+                  ...loadings,
+                  [loaderId]: false
+                }));
               }}
             />
           </View>
         </Section>
         <Section>
-          <ActivityIndicator animating={isLoadingAds[loaderId] === 'outdated'} color="blue" />
+          <ActivityIndicator
+            animating={isLoadingAds[loaderId] === "outdated"}
+            color="blue"
+          />
           <Button
             title="makeLoaderOutdated"
             onPress={async () => {
               try {
-                setIsLoading((loadings) => ({ ...loadings, [loaderId]: 'outdated' }));
+                setIsLoading((loadings) => ({
+                  ...loadings,
+                  [loaderId]: "outdated"
+                }));
                 const outdated = await AdManager.makeLoaderOutdated(loaderId);
                 addLog(`makeLoaderOutdated:`, outdated);
               } catch (e) {
@@ -269,12 +316,18 @@ export function ManagerScreen() {
           />
         </Section>
         <Section>
-          <ActivityIndicator animating={isLoadingAds[loaderId] === 'click'} color="blue" />
+          <ActivityIndicator
+            animating={isLoadingAds[loaderId] === "click"}
+            color="blue"
+          />
           <Button
             title="recordClick"
             onPress={async () => {
               try {
-                setIsLoading((loadings) => ({ ...loadings, [loaderId]: 'click' }));
+                setIsLoading((loadings) => ({
+                  ...loadings,
+                  [loaderId]: "click"
+                }));
                 const status = await AdManager.recordClick(loaderId);
                 addLog(`recordClick:`, `recorded ${JSON.stringify(status)}`);
               } catch (e) {
@@ -285,11 +338,14 @@ export function ManagerScreen() {
           />
         </Section>
         <Section>
-          <ActivityIndicator animating={isLoadingAds[loaderId] === 'click'} color="blue" />
+          <ActivityIndicator
+            animating={isLoadingAds[loaderId] === "click"}
+            color="blue"
+          />
           <TextInput
             onChangeText={setAssetKey}
             value={assetKey}
-            placeholder={'assetKey'}
+            placeholder={"assetKey"}
             clearButtonMode="while-editing"
             style={styles.textField}
           />
@@ -297,9 +353,18 @@ export function ManagerScreen() {
             title="recordClickOnAssetKey"
             onPress={async () => {
               try {
-                setIsLoading((loadings) => ({ ...loadings, [loaderId]: 'click' }));
-                const status = await AdManager.recordClickOnAssetKey(loaderId, assetKey);
-                addLog(`recordClickOnAssetKey:`, `recorded ${JSON.stringify(status)}`);
+                setIsLoading((loadings) => ({
+                  ...loadings,
+                  [loaderId]: "click"
+                }));
+                const status = await AdManager.recordClickOnAssetKey(
+                  loaderId,
+                  assetKey
+                );
+                addLog(
+                  `recordClickOnAssetKey:`,
+                  `recorded ${JSON.stringify(status)}`
+                );
               } catch (e) {
                 addLog(`Error:`, (e as Error).message);
               }
@@ -311,7 +376,7 @@ export function ManagerScreen() {
           <TextInput
             onChangeText={setLoaderId}
             value={loaderId}
-            placeholder={'loaderId'}
+            placeholder={"loaderId"}
             clearButtonMode="while-editing"
             style={styles.textField}
           />
@@ -319,12 +384,18 @@ export function ManagerScreen() {
             title="set"
             onPress={async () => {
               try {
-                await AdManager.setCustomClickHandlerForLoader(loaderId, (result) => {
-                  Alert.alert('Töröooo', 'Custom click handler for specific loader called!');
-                  addLog(`recordClickOnAssetKeyWithHandler:`, {
-                    result,
-                  });
-                });
+                await AdManager.setCustomClickHandlerForLoader(
+                  loaderId,
+                  (result) => {
+                    Alert.alert(
+                      "Töröooo",
+                      "Custom click handler for specific loader called!"
+                    );
+                    addLog(`recordClickOnAssetKeyWithHandler:`, {
+                      result
+                    });
+                  }
+                );
                 addLog(`setCustomClickHandlerForLoader: true`);
               } catch (e) {
                 addLog(`Error:`, (e as Error).message);
@@ -346,7 +417,7 @@ export function ManagerScreen() {
             title="setCustomDefaultClickHandler (alert)"
             onPress={async () => {
               await AdManager.setCustomDefaultClickHandler((result) => {
-                Alert.alert('CustomClickHandler', JSON.stringify(result || {}));
+                Alert.alert("CustomClickHandler", JSON.stringify(result || {}));
               });
               addLog(`set custom click handler:`);
             }}
@@ -364,7 +435,7 @@ export function ManagerScreen() {
           <TextInput
             onChangeText={setLoaderId}
             value={loaderId}
-            placeholder={'loaderId'}
+            placeholder={"loaderId"}
             clearButtonMode="while-editing"
             style={styles.textField}
           />
@@ -372,7 +443,10 @@ export function ManagerScreen() {
             title="destroyAdLoader"
             onPress={async () => {
               try {
-                setIsLoading((loadings) => ({ ...loadings, [loaderId]: 'click' }));
+                setIsLoading((loadings) => ({
+                  ...loadings,
+                  [loaderId]: "click"
+                }));
                 const onDestroy = await AdManager.destroyLoader(loaderId);
                 addLog(`destroyAdLoader:`, `destroy ${onDestroy}`);
               } catch (e) {
@@ -385,7 +459,10 @@ export function ManagerScreen() {
             title="removeAdLoader"
             onPress={async () => {
               try {
-                setIsLoading((loadings) => ({ ...loadings, [loaderId]: 'click' }));
+                setIsLoading((loadings) => ({
+                  ...loadings,
+                  [loaderId]: "click"
+                }));
                 const onRemove = await AdManager.removeAdLoader(loaderId);
                 addLog(`removeAdLoader:`, `removed ${onRemove}`);
               } catch (e) {
@@ -408,8 +485,8 @@ export function ManagerScreen() {
             title="clear"
             onPress={async () => {
               AdManager.clearAll();
-              setLog(['Cleared AdManager']);
-              setLoaderId('');
+              setLog(["Cleared AdManager"]);
+              setLoaderId("");
             }}
           />
         </Section>

@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
-import { PackageConfig } from './utils';
+import { PackageConfig } from "./utils";
 
 function getTimeDifferenceSince(lastTimestamp: undefined | number) {
   if (lastTimestamp === undefined) {
@@ -8,7 +8,7 @@ function getTimeDifferenceSince(lastTimestamp: undefined | number) {
     return {
       difference: 0,
       fromDate: now,
-      tillDate: now,
+      tillDate: now
     };
   } else {
     const fromDate = new Date(lastTimestamp);
@@ -17,7 +17,7 @@ function getTimeDifferenceSince(lastTimestamp: undefined | number) {
     return {
       difference,
       fromDate,
-      tillDate,
+      tillDate
     };
   }
 }
@@ -34,7 +34,9 @@ export function useFireAfterVisibilityDuration(
   useEffect(() => {
     let timeout: NodeJS.Timeout | undefined;
     if (condition) {
-      const { difference, tillDate } = getTimeDifferenceSince(lastTimestamp.current);
+      const { difference, tillDate } = getTimeDifferenceSince(
+        lastTimestamp.current
+      );
       duration.current += difference;
       const time_remaining = time - duration.current;
 
@@ -49,13 +51,13 @@ export function useFireAfterVisibilityDuration(
 
       if (PackageConfig.logging) {
         console.log(
-          'useEffect useFireAfterVisibilityDuration active:',
+          "useEffect useFireAfterVisibilityDuration active:",
           condition,
-          'visible: ',
+          "visible: ",
           isVisible,
           time,
           time - duration.current,
-          'remaining: ',
+          "remaining: ",
           time_remaining
         );
       }
@@ -68,6 +70,6 @@ export function useFireAfterVisibilityDuration(
   }, [condition, isVisible, time, fire]);
 
   return {
-    duration,
+    duration
   };
 }

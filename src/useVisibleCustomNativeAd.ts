@@ -1,10 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
-import type { AdQueueLoader } from './AdQueueLoader';
-import { AdState } from './types';
-import { CustomNativeAdHookReturnType, useCustomNativeAd } from './useCustomNativeAd';
-import { useFireAfterVisibilityDuration } from './useFireAfterVisibilityDuration';
-import { adStateToString, logInfo } from './utils';
+import type { AdQueueLoader } from "./AdQueueLoader";
+import { AdState } from "./types";
+import {
+  CustomNativeAdHookReturnType,
+  useCustomNativeAd
+} from "./useCustomNativeAd";
+import { useFireAfterVisibilityDuration } from "./useFireAfterVisibilityDuration";
+import { adStateToString, logInfo } from "./utils";
 
 export function useVisibleCustomNativeAd<AdFormatType, Targeting>({
   visible,
@@ -13,7 +16,7 @@ export function useVisibleCustomNativeAd<AdFormatType, Targeting>({
   msToDisplayTillRenew = 30 * 1000,
   renew_attempts,
   log = false,
-  identifier,
+  identifier
 }: {
   visible: boolean;
   adLoader: AdQueueLoader<AdFormatType, Targeting>;
@@ -34,36 +37,49 @@ export function useVisibleCustomNativeAd<AdFormatType, Targeting>({
     outdated,
     targeting,
     tracker,
-    error,
+    error
   } = useCustomNativeAd(adLoader!, {
     renew_attempts,
     log,
-    identifier,
+    identifier
   });
 
   useEffect(() => {
     logInfo(
       log,
       { ...adLoader.getSpecification(), identifier },
-      'updateEffect',
+      "updateEffect",
       adStateToString(adState),
-      'visible:',
+      "visible:",
       visible
     );
     if (adState === AdState.Received && visible) {
       display();
     } else if (adState === AdState.Error) {
-      logInfo(log, { ...adLoader.getSpecification(), identifier }, 'error -> renew');
+      logInfo(
+        log,
+        { ...adLoader.getSpecification(), identifier },
+        "error -> renew"
+      );
       renew();
     } else if (visible && adState === AdState.Outdated) {
-      logInfo(log, { ...adLoader.getSpecification(), identifier }, 'outdated -> renew');
+      logInfo(
+        log,
+        { ...adLoader.getSpecification(), identifier },
+        "outdated -> renew"
+      );
       renew();
     }
   }, [adState, visible, renew, display, log, adLoader, identifier]);
 
   const isMinDisplaying = adState >= AdState.Displaying;
   const isMinImpression = adState >= AdState.Impression;
-  useFireAfterVisibilityDuration(visible, impression, msToDisplayTillImpressionRecording, isMinDisplaying);
+  useFireAfterVisibilityDuration(
+    visible,
+    impression,
+    msToDisplayTillImpressionRecording,
+    isMinDisplaying
+  );
   useFireAfterVisibilityDuration(
     visible,
     outdated,
@@ -82,6 +98,6 @@ export function useVisibleCustomNativeAd<AdFormatType, Targeting>({
     outdated,
     targeting,
     tracker,
-    error,
+    error
   };
 }

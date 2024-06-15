@@ -1,19 +1,24 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState } from "react";
 
-import { StyleProp, Text, View, ViewStyle } from 'react-native';
+import { StyleProp, Text, View, ViewStyle } from "react-native";
 
 import {
-  type AdQueueLoader,
   CustomNativeAdHookReturnType,
   useVisibleCustomNativeAd,
-} from 'react-native-admanager-mobile-ads';
-import { VisibilityAwareView } from 'react-native-visibility-aware-view';
+  type AdQueueLoader
+} from "react-native-admanager-mobile-ads";
+import { VisibilityAwareView } from "react-native-visibility-aware-view";
 
-type CustomAdContext<AdFormatType, Targeting> = CustomNativeAdHookReturnType<AdFormatType, Targeting> & {
+type CustomAdContext<AdFormatType, Targeting> = CustomNativeAdHookReturnType<
+  AdFormatType,
+  Targeting
+> & {
   visible: boolean;
 };
 
-const Context: React.Context<CustomAdContext<any, any>> = React.createContext<CustomAdContext<any, any>>({} as any);
+const Context: React.Context<CustomAdContext<any, any>> = React.createContext<
+  CustomAdContext<any, any>
+>({} as any);
 export function useAd<F>() {
   return React.useContext<CustomAdContext<F, any>>(Context).ad;
 }
@@ -37,7 +42,7 @@ export function CustomNativeAdContainer<T>({
   style,
   msToDisplayTillImpressionRecording = 2000,
   msToDisplayTillRenew = 30 * 1000,
-  identifier,
+  identifier
 }: {
   style?: StyleProp<ViewStyle>;
   children?: React.ReactNode;
@@ -60,7 +65,7 @@ export function CustomNativeAdContainer<T>({
     msToDisplayTillImpressionRecording,
     adLoader,
     log: true,
-    identifier,
+    identifier
   });
 
   return (
@@ -72,7 +77,7 @@ export function CustomNativeAdContainer<T>({
     >
       {__DEV__ ? (
         <View>
-          <Text>{visible ? 'visible' : 'invis'}</Text>
+          <Text>{visible ? "visible" : "invis"}</Text>
           <Text>{result.id}</Text>
           <Text>{JSON.stringify(result.tracker)}</Text>
           <Text>Targeting: {JSON.stringify(result.targeting || {})}</Text>
@@ -81,12 +86,12 @@ export function CustomNativeAdContainer<T>({
       <Context.Provider
         value={{
           ...result,
-          visible,
+          visible
         }}
       >
         {children}
       </Context.Provider>
-      <Text>{visible ? 'visible' : 'invis'}</Text>
+      <Text>{visible ? "visible" : "invis"}</Text>
     </VisibilityAwareView>
   );
 }

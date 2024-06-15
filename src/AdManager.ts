@@ -1,28 +1,49 @@
-import { EmitterSubscription, NativeEventEmitter, NativeModules, Platform, findNodeHandle } from 'react-native';
+import {
+  EmitterSubscription,
+  NativeEventEmitter,
+  NativeModules,
+  Platform,
+  findNodeHandle
+} from "react-native";
 
-import type { AdLoaderDetails, Spec } from './NativeAdManager';
-import type { AdTrackingTransparencyStatus, GADAdRequestOptions, GADInitializationStatus } from './types';
+import type { AdLoaderDetails, Spec } from "./NativeAdmanagerMobileAds";
+import type {
+  AdTrackingTransparencyStatus,
+  GADAdRequestOptions,
+  GADInitializationStatus
+} from "./types";
 
 const LINKING_ERROR =
   `The package 'react-native-admanager-mobile-ads' doesn't seem to be linked. Make sure: \n\n` +
-  Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
-  '- You rebuilt the app after installing the package\n' +
-  '- You are not using Expo Go\n';
+  Platform.select({ ios: "- You have run 'pod install'\n", default: "" }) +
+  "- You rebuilt the app after installing the package\n" +
+  "- You are not using Expo Go\n";
 
 // @ts-expect-error
 const isTurboModuleEnabled = global.__turboModuleProxy != null;
 
-const AdManagerModule: Spec = isTurboModuleEnabled ? require('./NativeAdManager').default : NativeModules.AdManager;
+const AdManagerModule: Spec = isTurboModuleEnabled
+  ? require("./NativeAdmanagerMobileAds").default
+  : NativeModules.AdmanagerMobileAds;
 
 export const NativeAdManager: Spec = AdManagerModule
   ? AdManagerModule
   : new Proxy({} as any, {
       get() {
         throw new Error(LINKING_ERROR);
-      },
+      }
     });
 
-export type CustomAdClickHandler = (result: { assetKey: string } & AdLoaderDetails<any>) => void;
+export async function multiply(a: number, b: number): Promise<number> {
+  if (Platform.OS === "android") {
+    return NativeAdManager.multiply(a, b);
+  }
+  return 0;
+}
+
+export type CustomAdClickHandler = (
+  result: { assetKey: string } & AdLoaderDetails<any>
+) => void;
 
 class AdManagerController {
   private emitter: NativeEventEmitter;
@@ -33,17 +54,20 @@ class AdManagerController {
     this.emitter = new NativeEventEmitter(NativeAdManager as any);
 
     // Set up the event listener
-    this.subscription = this.emitter.addListener('onAdClicked', (data: AdLoaderDetails<any> & { assetKey: string }) => {
-      // Handle the callback data here
-      if (data && data.id) {
-        const handler = this.customClickHandler[data.id];
-        if (handler) {
-          handler(data);
-        } else if (this.defaultClickHandler) {
-          this.defaultClickHandler(data);
+    this.subscription = this.emitter.addListener(
+      "onAdClicked",
+      (data: AdLoaderDetails<any> & { assetKey: string }) => {
+        // Handle the callback data here
+        if (data && data.id) {
+          const handler = this.customClickHandler[data.id];
+          if (handler) {
+            handler(data);
+          } else if (this.defaultClickHandler) {
+            this.defaultClickHandler(data);
+          }
         }
       }
-    });
+    );
   }
 
   removeSubscription() {
@@ -62,12 +86,16 @@ class AdManagerController {
     return NativeAdManager.setTestDeviceIds(testDeviceIds);
   }
 
-  requestAdTrackingTransparency(callback: (status: AdTrackingTransparencyStatus) => void) {
+  requestAdTrackingTransparency(
+    callback: (status: AdTrackingTransparencyStatus) => void
+  ) {
     return NativeAdManager.requestAdTrackingTransparency(callback);
   }
 
   setOnlyRequestAdsAfterATTFinished(onlyLoadRequestsAfterATT: boolean) {
-    return NativeAdManager.requestAdTrackingTransparencyBeforeAdLoad(onlyLoadRequestsAfterATT);
+    return NativeAdManager.requestAdTrackingTransparencyBeforeAdLoad(
+      onlyLoadRequestsAfterATT
+    );
   }
 
   clearAll() {
@@ -106,7 +134,10 @@ class AdManagerController {
     adLoaderId: string,
     options: GADAdRequestOptions<AdTargetingOptions>
   ) {
-    return NativeAdManager.loadRequest<AdFormatType, AdTargetingOptions>(adLoaderId, options);
+    return NativeAdManager.loadRequest<AdFormatType, AdTargetingOptions>(
+      adLoaderId,
+      options
+    );
   }
 
   removeAdLoader(loaderId: string) {
@@ -125,14 +156,20 @@ class AdManagerController {
     return NativeAdManager.setIsDisplayingForLoader<AdFormatType>(loaderId);
   }
 
-  setIsDisplayingOnViewForLoader<AdFormatType>(loaderId: string, adViewRef: React.RefObject<any>) {
+  setIsDisplayingOnViewForLoader<AdFormatType>(
+    loaderId: string,
+    adViewRef: React.RefObject<any>
+  ) {
     if (adViewRef && adViewRef.current) {
       const adViewTag = findNodeHandle(adViewRef.current);
       if (adViewTag) {
-        return NativeAdManager.setIsDisplayingOnViewForLoader<AdFormatType>(loaderId, adViewTag);
+        return NativeAdManager.setIsDisplayingOnViewForLoader<AdFormatType>(
+          loaderId,
+          adViewTag
+        );
       }
     }
-    throw new Error('AdViewRef was not found or resolved in null value');
+    throw new Error("AdViewRef was not found or resolved in null value");
   }
 
   makeLoaderOutdated<AdFormatType>(loaderId: string) {
@@ -147,7 +184,10 @@ class AdManagerController {
     return NativeAdManager.recordImpression<AdFormatType>(adLoaderId);
   }
 
-  async setCustomClickHandlerForLoader(loaderId: string, clickHandler?: CustomAdClickHandler) {
+  async setCustomClickHandlerForLoader(
+    loaderId: string,
+    clickHandler?: CustomAdClickHandler
+  ) {
     if (clickHandler) {
       await NativeAdManager.setCustomClickHandlerForLoader(loaderId);
       this.customClickHandler[loaderId] = clickHandler;
@@ -166,7 +206,10 @@ class AdManagerController {
   }
 
   recordClickOnAssetKey<AdFormatType>(adLoaderId: string, assetKey: string) {
-    return NativeAdManager.recordClickOnAssetKey<AdFormatType>(adLoaderId, assetKey);
+    return NativeAdManager.recordClickOnAssetKey<AdFormatType>(
+      adLoaderId,
+      assetKey
+    );
   }
 }
 

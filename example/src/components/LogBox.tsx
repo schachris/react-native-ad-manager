@@ -1,6 +1,6 @@
-import React from 'react';
+import React from "react";
 
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 const styles = StyleSheet.create({
   logBox: {
@@ -8,21 +8,21 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     borderWidth: 2,
     borderRadius: 6,
-    borderColor: 'gray',
-    minHeight: 60,
+    borderColor: "gray",
+    minHeight: 60
   },
   logBoxTitle: {
     marginHorizontal: 12,
-    position: 'absolute',
-    alignSelf: 'center',
-    backgroundColor: 'white',
+    position: "absolute",
+    alignSelf: "center",
+    backgroundColor: "white",
     borderRadius: 6,
     padding: 3,
-    color: '#919191',
+    color: "#919191"
   },
   text: {
-    color: 'black',
-  },
+    color: "black"
+  }
 });
 
 export function LogBox({ logs: log }: { logs: any[] }) {
@@ -38,9 +38,14 @@ export function LogBox({ logs: log }: { logs: any[] }) {
       <ScrollView ref={scrollRef} style={{ height: 260 }} scrollEnabled>
         {log.map((logInfo, i) => {
           return (
-            <Text selectable selectionColor={'#45342155'} key={i} style={styles.text}>
-              {typeof logInfo === 'string' ? logInfo : JSON.stringify(logInfo)}
-              {logInfo === '\n' ? '' : '\n'}
+            <Text
+              selectable
+              selectionColor={"#45342155"}
+              key={i}
+              style={styles.text}
+            >
+              {typeof logInfo === "string" ? logInfo : JSON.stringify(logInfo)}
+              {logInfo === "\n" ? "" : "\n"}
             </Text>
           );
         })}
