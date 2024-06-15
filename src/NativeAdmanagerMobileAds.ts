@@ -108,4 +108,4 @@ export interface Spec extends TurboModule {
   removeListeners: (count: number) => void;
 }
 
-export default TurboModuleRegistry.getEnforcing<Spec>("AdmanagerMobileAds");
+export default TurboModuleRegistry.getEnforcing<Spec>("AdManagerMobileAds");

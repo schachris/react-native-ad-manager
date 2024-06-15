@@ -7,8 +7,8 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 
-abstract class AdmanagerMobileAdsSpec extends ReactContextBaseJavaModule {
-  AdmanagerMobileAdsSpec(ReactApplicationContext context) {
+abstract class AdManagerMobileAdsSpec extends ReactContextBaseJavaModule {
+  AdManagerMobileAdsSpec(ReactApplicationContext context) {
     super(context);
   }
 

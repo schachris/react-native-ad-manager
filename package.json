@@ -214,7 +214,7 @@
     ]
   },
   "codegenConfig": {
-    "name": "RNAdmanagerMobileAdsSpec",
+    "name": "RNAdManagerMobileAdsSpec",
     "type": "modules",
     "jsSrcsDir": "src"
   },

@@ -2,6 +2,6 @@
 
 #import <React/RCTBridgeModule.h>
 
-@interface AdmanagerMobileAdsConsent : NSObject <RCTBridgeModule>
+@interface AdManagerMobileAdsConsent : NSObject <RCTBridgeModule>
 
 @end

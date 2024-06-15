@@ -1,10 +1,10 @@
 #import <React/RCTUIManager.h>
 
-#import "AdmanagerMobileAds.h"
+#import "AdManagerMobileAds.h"
 #import "AdManagerController.h"
 #import "CustomNativeAdError.h"
 
-@implementation AdmanagerMobileAds{
+@implementation AdManagerMobileAds{
     bool hasDefaultCustomClickHandler;
     NSDictionary * defaultTargeting;
     bool hasListeners;
@@ -34,7 +34,7 @@ RCT_EXPORT_MODULE()
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
 (const facebook::react::ObjCTurboModule::InitParams &)params
 {
-    return std::make_shared<facebook::react::NativeAdmanagerMobileAdsSpecJSI>(params);
+    return std::make_shared<facebook::react::NativeAdManagerMobileAdsSpecJSI>(params);
 }
 #endif
 
@@ -381,10 +381,10 @@ RCT_REMAP_METHOD(recordClick,
     }];
 }
 
-- (void)createAdLoader:(JS::NativeAdmanagerMobileAds::SpecCreateAdLoaderOptions &)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+- (void)createAdLoader:(JS::NativeAdManagerMobileAds::SpecCreateAdLoaderOptions &)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
     
-    std::optional<JS::NativeAdmanagerMobileAds::SpecCreateAdLoaderOptionsVideoConfig> videoConfig = options.videoConfig();
-    std::optional<JS::NativeAdmanagerMobileAds::SpecCreateAdLoaderOptionsImageConfig> imageConfig = options.imageConfig();
+    std::optional<JS::NativeAdManagerMobileAds::SpecCreateAdLoaderOptionsVideoConfig> videoConfig = options.videoConfig();
+    std::optional<JS::NativeAdManagerMobileAds::SpecCreateAdLoaderOptionsImageConfig> imageConfig = options.imageConfig();
 
     
     GADNativeAdImageAdLoaderOptions *imageOptions = [[GADNativeAdImageAdLoaderOptions alloc] init];

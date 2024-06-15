@@ -37,8 +37,8 @@ import com.google.android.ump.UserMessagingPlatform;
 
 import javax.annotation.Nonnull;
 
-public class AdmanagerMobileAdsConsentModule extends AdmanagerMobileAdsConsentSpec {
-  public static final String NAME = "AdmanagerMobileAdsConsent";
+public class AdManagerMobileAdsConsentModule extends AdManagerMobileAdsConsentSpec {
+  public static final String NAME = "AdManagerMobileAdsConsent";
   private ConsentInformation consentInformation;
 
   @Override
@@ -48,7 +48,7 @@ public class AdmanagerMobileAdsConsentModule extends AdmanagerMobileAdsConsentSp
   }
 
 
-  public AdmanagerMobileAdsConsentModule(ReactApplicationContext reactContext) {
+  public AdManagerMobileAdsConsentModule(ReactApplicationContext reactContext) {
     super(reactContext);
     consentInformation = UserMessagingPlatform.getConsentInformation(reactContext);
   }

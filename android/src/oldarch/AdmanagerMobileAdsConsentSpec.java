@@ -7,8 +7,8 @@ import com.facebook.react.bridge.ReadableMap;
 
 import javax.annotation.Nonnull;
 
-abstract class AdmanagerMobileAdsConsentSpec extends ReactContextBaseJavaModule {
-  AdmanagerMobileAdsConsentSpec(ReactApplicationContext context) {
+abstract class AdManagerMobileAdsConsentSpec extends ReactContextBaseJavaModule {
+  AdManagerMobileAdsConsentSpec(ReactApplicationContext context) {
     super(context);
   }
 

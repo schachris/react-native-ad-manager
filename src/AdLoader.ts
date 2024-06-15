@@ -1,5 +1,5 @@
 import { AdManager } from "./AdManager";
-import type { AdLoaderDetails } from "./NativeAdmanagerMobileAds";
+import type { AdLoaderDetails } from "./NativeAdManagerMobileAds";
 import { PackageConfig, logInfo } from "./log";
 import {
   AdState,

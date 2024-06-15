@@ -134,9 +134,9 @@ cd ./example/android && ./gradlew generateCodegenArtifactsFromSchema && cd ../..
 
 Under the Google EU User Consent Policy, you must make certain disclosures to your users in the European Economic Area (EEA) and obtain their consent to use cookies or other local storage, where legally required, and to use personal data (such as AdID) to serve ads. This policy reflects the requirements of the EU ePrivacy Directive and the General Data Protection Regulation (GDPR).
 
-The React Native Admanager Mobile Ads module provides out of the box support for helping to manage your users consent within your application. The AdsConsent helper which comes with the module wraps the Google UMP SDK for both Android & iOS, and provides a single JavaScript interface for both platforms.
+The React Native AdManager Mobile Ads module provides out of the box support for helping to manage your users consent within your application. The AdsConsent helper which comes with the module wraps the Google UMP SDK for both Android & iOS, and provides a single JavaScript interface for both platforms.
 
-> This is mostly copied from https://docs.page/invertase/react-native-google-mobile-ads/european-user-consent. as invertase did a great work on it.
+> This is mostly copied from https://docs.page/invertase/react-native-admanager-mobile-ads/european-user-consent. as invertase did a great work on it.
 
 ### Understanding AdMob Ads
 
@@ -176,6 +176,173 @@ To setup and configure ads consent collection, first of all:
 ```
 
 You'll need to generate a new development build before using it.
+
+### Requesting consent information
+
+It is recommended you request consent information each time your application starts to determine if the consent modal should be shown, e.g. due to provider changes.
+
+The `AdsConsent` helper provides a promise based method to return the users consent status called `requestInfoUpdate`.
+
+```js
+import { AdsConsent } from "react-native-admanager-mobile-ads";
+
+const consentInfo = await AdsConsent.requestConsentInfoUpdate();
+```
+
+The method returns an `AdsConsentInfo` interface, which provides information about consent form availability and the users consent status:
+
+- **status**: The status can be one of 4 outcomes:
+  - `UNKNOWN`: Unknown consent status.
+  - `REQUIRED`: User consent required but not yet obtained.
+  - `NOT_REQUIRED`: User consent not required.
+  - `OBTAINED`: User consent already obtained.
+- **isConsentFormAvailable**: A boolean value. If `true` a consent form is available.
+
+**Note:** The return status of this call is the status of _form presentation and response collection_, **not
+the the actual user consent**. It simply indicates if you now have a consent response to decode.
+(_i.e._ if user consent is **required**, the form has been presented, and user has
+**denied** the consent, the status returned by this method will be `OBTAINED`,
+and not `REQUIRED` as some may expect). To check the actual consent status
+see [Inspecting consent choices] below.
+
+### Gathering user consent
+
+You should request an update of the user's consent information at every app launch, using `requestInfoUpdate`.
+This determines whether your user needs to provide consent if they haven't done so already, or if their consent has expired.
+
+After you have received the most up-to-date consent status, call `loadAndShowConsentFormIfRequired` to load a consent form.
+If the consent status is required, the SDK loads a form and immediately presents it.
+The completion handler is called after the form is dismissed. If consent is not required, the completion handler is called immediately.
+
+Before requesting ads in your app, check if you have obtained consent from the user using `canRequestAds`.
+If an error occurs during the consent gathering process, you should still attempt to request ads.
+The UMP SDK uses the consent status from the previous session.
+
+```js
+import {
+  AdManager,
+  AdsConsent,
+  AdsConsentStatus
+} from "react-native-admanager-mobile-ads";
+
+let isMobileAdsStartCalled = false;
+
+// Request an update for the consent information.
+AdsConsent.requestInfoUpdate().then(() => {
+  AdsConsent.loadAndShowConsentFormIfRequired().then((adsConsentInfo) => {
+    // Consent has been gathered.
+    if (adsConsentInfo.canRequestAds) {
+      startGoogleMobileAdsSDK();
+    }
+  });
+});
+
+// Check if you can initialize the Google Mobile Ads SDK in parallel
+// while checking for new consent information. Consent obtained in
+// the previous session can be used to request ads.
+// So you can start loading ads as soon as possible after your app launches.
+const { canRequestAds } = await AdsConsent.getConsentInfo();
+if (canRequestAds) {
+  startGoogleMobileAdsSDK();
+}
+
+async function startGoogleMobileAdsSDK() {
+  if (isMobileAdsStartCalled) return;
+
+  isMobileAdsStartCalled = true;
+
+  // (Optional, iOS) Handle Apple's App Tracking Transparency manually.
+  const gdprApplies = await AdsConsent.getGdprApplies();
+  const hasConsentForPurposeOne =
+    gdprApplies && (await AdsConsent.getPurposeConsents()).startsWith("1");
+  if (!gdprApplies || hasConsentForPurposeOne) {
+    // Request ATT...
+  }
+
+  // Initialize the Google Mobile Ads SDK.
+  await AdManager.start();
+
+  // Request an ad...
+}
+```
+
+> Do not persist the status. You could however store this locally in application state (e.g. React Context) and update the status on every app launch as it may change.
+
+### Inspecting consent choices
+
+The AdsConsentStatus tells you if you should show the modal to a user or not. Often times you want to run logic based on the user's choices though.
+Especially since the Google Mobile Ads SDK won't show any ads if the user didn't give consent to store and/or access information on the device.
+This library exports a method that returns some of the most relevant consent flags to handle common use cases.
+
+```js
+import { AdsConsent } from "react-native-admanager-mobile-ads";
+
+const {
+  activelyScanDeviceCharacteristicsForIdentification,
+  applyMarketResearchToGenerateAudienceInsights,
+  createAPersonalisedAdsProfile,
+  createAPersonalisedContentProfile,
+  developAndImproveProducts,
+  measureAdPerformance,
+  measureContentPerformance,
+  selectBasicAds,
+  selectPersonalisedAds,
+  selectPersonalisedContent,
+  storeAndAccessInformationOnDevice,
+  usePreciseGeolocationData
+} = await AdsConsent.getUserChoices();
+
+if (storeAndAccessInformationOnDevice === false) {
+  /**
+   * The user declined consent for purpose 1,
+   * the Google Mobile Ads SDK won't serve ads.
+   */
+}
+```
+
+**Note:** Don't try to use this functionality to enforce user consent on iOS,
+this will likely result in failed app review upon submission to Apple Store, based on [review guideline 3.2.2.vi](https://developer.apple.com/app-store/review/guidelines/#3.2.2):
+
+> ...Apps should not require users to rate the app, review the app, watch videos, download other apps, tap on advertisements, enable tracking...
+
+### Testing
+
+When developing the consent flow, the behavior of the `AdsConsent` responses may not be reliable due to the environment
+(e.g. using an emulator vs real device). It is possible to set a debug location to test the various responses from the
+UMP SDK.
+
+If using a real device, ensure you add it to the list of allowed devices by passing the device ID, which can be obtained from native logs or using a library
+such as [react-native-device-info](https://github.com/react-native-community/react-native-device-info), to `testDeviceIdentifiers`.
+
+> Emulators are automatically whitelisted.
+
+To set a debug location, use the `debugGeography` key. It accepts 3 values:
+
+- **DISABLED**: Removes any previous debug locations.
+- **EEA**: Set the test device to be within the EEA.
+- **NOT_EEA**: Set the test device to be outside of the EEA.
+
+For example:
+
+```js
+import {
+  AdsConsent,
+  AdsConsentDebugGeography
+} from "react-native-admanager-mobile-ads";
+
+const consentInfo = await AdsConsent.requestInfoUpdate({
+  debugGeography: AdsConsentDebugGeography.EEA,
+  testDeviceIdentifiers: ["TEST-DEVICE-HASHED-ID"]
+});
+```
+
+It is possible to reset the UMP state for test devices. To reset the ATT state you have to delete and reinstall your app though.
+
+```js
+import { AdsConsent } from "react-native-admanager-mobile-ads";
+
+AdsConsent.reset();
+```
 
 ## Contributing
 

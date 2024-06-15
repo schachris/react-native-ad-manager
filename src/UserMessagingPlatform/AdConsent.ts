@@ -18,7 +18,7 @@ import {
 } from "./types";
 
 import { Platform } from "react-native";
-import { Spec } from "../spec/NativeAdmanagerMobileAdsConsent";
+import { Spec } from "../spec/NativeAdManagerMobileAdsConsent";
 
 const LINKING_ERROR =
   `The package 'react-native-admanager-mobile-ads' (AdConsent) doesn't seem to be linked. Make sure: \n\n` +
@@ -30,8 +30,8 @@ const LINKING_ERROR =
 const isTurboModuleEnabled = global.__turboModuleProxy != null;
 
 const AdsConsentModule: Spec = isTurboModuleEnabled
-  ? require("../spec/NativeAdmanagerMobileAdsConsent").default
-  : NativeModules.AdmanagerMobileAdsConsent;
+  ? require("../spec/NativeAdManagerMobileAdsConsent").default
+  : NativeModules.AdManagerMobileAdsConsent;
 
 const native: Spec = AdsConsentModule
   ? AdsConsentModule

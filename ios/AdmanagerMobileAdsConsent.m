@@ -5,9 +5,9 @@
 #include <UserMessagingPlatform/UserMessagingPlatform.h>
 #endif
 #import "RCTBridgeModule.h"
-#import "AdmanagerMobileAdsConsent.h"
+#import "AdManagerMobileAdsConsent.h"
 
-@implementation AdmanagerMobileAdsConsent
+@implementation AdManagerMobileAdsConsent
 static NSString *const RNErrorDomain = @"RNErrorDomain";
 #pragma mark -
 #pragma mark Module Setup
@@ -19,7 +19,7 @@ RCT_EXPORT_MODULE();
 }
 
 #pragma mark -
-#pragma mark Admanager Mobile Ads Methods
+#pragma mark AdManager Mobile Ads Methods
 
 #if !TARGET_OS_MACCATALYST
 - (NSString *)getConsentStatusString:(UMPConsentStatus)consentStatus {
@@ -85,7 +85,7 @@ RCT_EXPORT_METHOD(requestInfoUpdate
       requestConsentInfoUpdateWithParameters:parameters
                            completionHandler:^(NSError *_Nullable error) {
                              if (error) {
-                                 [AdmanagerMobileAdsConsent
+                                 [AdManagerMobileAdsConsent
                                    rejectPromiseWithUserInfo:reject
                                                     userInfo:[@{
                                                       @"code" : @"consent-update-failed",
@@ -102,7 +102,7 @@ RCT_EXPORT_METHOD(showForm : (RCTPromiseResolveBlock)resolve : (RCTPromiseReject
 #if !TARGET_OS_MACCATALYST
   [UMPConsentForm loadWithCompletionHandler:^(UMPConsentForm *form, NSError *loadError) {
     if (loadError) {
-        [AdmanagerMobileAdsConsent rejectPromiseWithUserInfo:reject
+        [AdManagerMobileAdsConsent rejectPromiseWithUserInfo:reject
                                       userInfo:[@{
                                         @"code" : @"consent-form-error",
                                         @"message" : loadError.localizedDescription,
@@ -112,7 +112,7 @@ RCT_EXPORT_METHOD(showForm : (RCTPromiseResolveBlock)resolve : (RCTPromiseReject
                                           .delegate.window.rootViewController
                     completionHandler:^(NSError *_Nullable dismissError) {
                       if (dismissError) {
-                          [AdmanagerMobileAdsConsent
+                          [AdManagerMobileAdsConsent
                             rejectPromiseWithUserInfo:reject
                                              userInfo:[@{
                                                @"code" : @"consent-form-error",
@@ -136,7 +136,7 @@ RCT_EXPORT_METHOD(showPrivacyOptionsForm
                                                       .delegate.window.rootViewController
                                 completionHandler:^(NSError *_Nullable formError) {
                                   if (formError) {
-                                      [AdmanagerMobileAdsConsent
+                                      [AdManagerMobileAdsConsent
                                         rejectPromiseWithUserInfo:reject
                                                          userInfo:[@{
                                                            @"code" : @"privacy-options-form-error",
@@ -159,7 +159,7 @@ RCT_EXPORT_METHOD(loadAndShowConsentFormIfRequired
                                                      .delegate.window.rootViewController
                                completionHandler:^(NSError *_Nullable formError) {
                                  if (formError) {
-                                     [AdmanagerMobileAdsConsent
+                                     [AdManagerMobileAdsConsent
                                        rejectPromiseWithUserInfo:reject
                                                         userInfo:[@{
                                                           @"code" : @"consent-form-error",
@@ -191,7 +191,7 @@ RCT_EXPORT_METHOD(getTCString : (RCTPromiseResolveBlock)resolve : (RCTPromiseRej
     NSString *tcString = [[NSUserDefaults standardUserDefaults] objectForKey:@"IABTCF_TCString"];
     resolve(tcString);
   } @catch (NSError *error) {
-      [AdmanagerMobileAdsConsent rejectPromiseWithUserInfo:reject
+      [AdManagerMobileAdsConsent rejectPromiseWithUserInfo:reject
                                     userInfo:[@{
                                       @"code" : @"consent-string-error",
                                       @"message" : error.localizedDescription,
@@ -206,7 +206,7 @@ RCT_EXPORT_METHOD(getGdprApplies
     BOOL gdprApplies = [[NSUserDefaults standardUserDefaults] boolForKey:@"IABTCF_gdprApplies"];
     resolve(@(gdprApplies));
   } @catch (NSError *error) {
-      [AdmanagerMobileAdsConsent rejectPromiseWithUserInfo:reject
+      [AdManagerMobileAdsConsent rejectPromiseWithUserInfo:reject
                                     userInfo:[@{
                                       @"code" : @"consent-string-error",
                                       @"message" : error.localizedDescription,
@@ -222,7 +222,7 @@ RCT_EXPORT_METHOD(getPurposeConsents
         [[NSUserDefaults standardUserDefaults] stringForKey:@"IABTCF_PurposeConsents"];
     resolve(purposeConsents);
   } @catch (NSError *error) {
-      [AdmanagerMobileAdsConsent rejectPromiseWithUserInfo:reject
+      [AdManagerMobileAdsConsent rejectPromiseWithUserInfo:reject
                                     userInfo:[@{
                                       @"code" : @"consent-string-error",
                                       @"message" : error.localizedDescription,

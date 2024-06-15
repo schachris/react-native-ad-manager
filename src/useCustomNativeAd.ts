@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { AdLoader } from "./AdLoader";
 import { AdQueueLoader } from "./AdQueueLoader";
-import { AdDetails } from "./NativeAdmanagerMobileAds";
+import { AdDetails } from "./NativeAdManagerMobileAds";
 import { PackageConfig, logInfo } from "./log";
 import { AdState, type AdSpecification } from "./types";
 import { adStateToString } from "./utils";

@@ -14,24 +14,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AdmanagerMobileAdsPackage extends TurboReactPackage {
+public class AdManagerMobileAdsPackage extends TurboReactPackage {
 
   @NonNull
   @Override
   public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
     List<NativeModule> modules = new ArrayList<>();
-    modules.add(new AdmanagerMobileAdsModule(reactContext));
-    modules.add(new AdmanagerMobileAdsConsentModule(reactContext));
+    modules.add(new AdManagerMobileAdsModule(reactContext));
+    modules.add(new AdManagerMobileAdsConsentModule(reactContext));
     return modules;
   }
 
   @Nullable
   @Override
   public NativeModule getModule(String name, ReactApplicationContext reactContext) {
-    if (name.equals(AdmanagerMobileAdsModule.NAME)) {
-      return new AdmanagerMobileAdsModule(reactContext);
-    } else if (name.equals(AdmanagerMobileAdsConsentModule.NAME)) {
-      return new AdmanagerMobileAdsConsentModule(reactContext);
+    if (name.equals(AdManagerMobileAdsModule.NAME)) {
+      return new AdManagerMobileAdsModule(reactContext);
+    } else if (name.equals(AdManagerMobileAdsConsentModule.NAME)) {
+      return new AdManagerMobileAdsConsentModule(reactContext);
     } else {
       return null;
     }
@@ -43,10 +43,10 @@ public class AdmanagerMobileAdsPackage extends TurboReactPackage {
       final Map<String, ReactModuleInfo> moduleInfos = new HashMap<>();
       boolean isTurboModule = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED;
       moduleInfos.put(
-              AdmanagerMobileAdsModule.NAME,
+              AdManagerMobileAdsModule.NAME,
               new ReactModuleInfo(
-                      AdmanagerMobileAdsModule.NAME,
-                      AdmanagerMobileAdsModule.NAME,
+                      AdManagerMobileAdsModule.NAME,
+                      AdManagerMobileAdsModule.NAME,
                       false, // canOverrideExistingModule
                       false, // needsEagerInit
                       true, // hasConstants
@@ -54,10 +54,10 @@ public class AdmanagerMobileAdsPackage extends TurboReactPackage {
                       isTurboModule // isTurboModule
       ));
       moduleInfos.put(
-        AdmanagerMobileAdsConsentModule.NAME,
+        AdManagerMobileAdsConsentModule.NAME,
         new ReactModuleInfo(
-          AdmanagerMobileAdsConsentModule.NAME,
-          AdmanagerMobileAdsConsentModule.NAME,
+          AdManagerMobileAdsConsentModule.NAME,
+          AdManagerMobileAdsConsentModule.NAME,
           false, // canOverrideExistingModule
           false, // needsEagerInit
           true, // hasConstants
